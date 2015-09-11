@@ -1,34 +1,33 @@
 package com.aqsara.tambalban;
 
-import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.support.v7.app.ActionBarActivity;
+import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.GridView;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
 
 
-public class MainMenuActivity extends Activity {
+public class MainMenuActivity extends BaseApp implements
+        GoogleApiClient.ConnectionCallbacks
+        , GoogleApiClient.OnConnectionFailedListener {
+
+    GoogleApiClient googleApiClient;
+    Location lastKnownLocation;
 
     GridView gv;
     Context context;
     ArrayList prgmName;
-    public static String[] prgmNameList = {
-      "Let Us C", "c++", "JAVA", "Jsp"
-    };
     public static int [] prgmImages = {
-            R.drawable.search, R.drawable.add_place, R.drawable.user
-            , R.drawable.info
-            /*
-            , R.drawable.images4, R.drawable.images5
-            , R.drawable.images6, R.drawable.images7, R.drawable.images8
-            */
+            R.drawable.search
+            , R.drawable.add
+            , R.drawable.user
+            , R.drawable.info,
     };
 
     @Override
@@ -36,15 +35,31 @@ public class MainMenuActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
 
-        Log.d("ban", "tes");
         gv=(GridView) findViewById(R.id.gridView1);
-        gv.setAdapter(new CustomAdapter(this, prgmNameList, prgmImages));
+        gv.setAdapter(new CustomAdapter(this, prgmImages));
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        setAppLocation(LocationServices.FusedLocationApi.getLastLocation(googleApiClient));
+    }
+
+    private void setAppLocation(Location location){
+        lastKnownLocation = location;
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
     }
 }

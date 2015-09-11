@@ -1,6 +1,7 @@
 package com.aqsara.tambalban;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,21 +15,21 @@ import android.widget.Toast;
  */
 public class CustomAdapter extends BaseAdapter{
 
-    String[] result;
+    int mainMenuCount;
     Context context;
     int[] imageId;
     private static LayoutInflater inflater = null;
 
-    public CustomAdapter(MainMenuActivity mainActivity, String[] prgmNameList, int[] prgmImages){
-        result = prgmNameList;
+    public CustomAdapter(MainMenuActivity mainActivity, int[] prgmImages){
         context = mainActivity;
         imageId = prgmImages;
+        mainMenuCount = prgmImages.length;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
     public int getCount() {
-        return result.length;
+        return mainMenuCount;
     }
 
     @Override
@@ -42,21 +43,22 @@ public class CustomAdapter extends BaseAdapter{
     }
 
     @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, final ViewGroup parent) {
         Holder holder = new Holder();
         View rowView;
-
         rowView = inflater.inflate(R.layout.program_list, null);
-//        holder.tv = (TextView) rowView.findViewById(R.id.textView1);
         holder.img = (ImageView) rowView.findViewById(R.id.imageView1);
-
-//        holder.tv.setText(result[position]);
         holder.img.setImageResource(imageId[position]);
-
         rowView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "You Clicked "+result[position], Toast.LENGTH_LONG).show();
+                switch (position){
+                    case MainMenuConstant.MAIN_MENU_SEARCH:
+                        Intent intent = new Intent(context, MainActivity.class);
+                        context.startActivity(intent);
+                        break;
+                }
+                Toast.makeText(context, "You Clicked "+position, Toast.LENGTH_SHORT).show();
             }
         });
         return rowView;
