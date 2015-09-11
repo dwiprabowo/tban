@@ -8,7 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 /**
  * Created by dwi on 11/09/15.
  */
-public class BaseApp extends AppCompatActivity {
+public abstract class BaseApp extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,12 +16,14 @@ public class BaseApp extends AppCompatActivity {
         setActionBar();
     }
 
+    protected abstract String title();
+
     private void setActionBar(){
         ActionBar actionBar = getSupportActionBar();
         actionBar.setLogo(R.mipmap.actionbar_logo);
         actionBar.setDisplayUseLogoEnabled(true);
         actionBar.setDisplayShowHomeEnabled(true);
-        actionBar.setTitle("Lokasi");
-        actionBar.setSubtitle("Tambal Ban");
+        actionBar.setTitle(title());
+        actionBar.setSubtitle(R.string.app_name);
     }
 }

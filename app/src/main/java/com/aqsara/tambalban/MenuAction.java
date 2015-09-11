@@ -13,14 +13,14 @@ import android.widget.Toast;
 /**
  * Created by dwi on 10/09/15.
  */
-public class CustomAdapter extends BaseAdapter{
+public class MenuAction extends BaseAdapter{
 
     int mainMenuCount;
     Context context;
     int[] imageId;
     private static LayoutInflater inflater = null;
 
-    public CustomAdapter(MainMenuActivity mainActivity, int[] prgmImages){
+    public MenuAction(MainMenuActivity mainActivity, int[] prgmImages){
         context = mainActivity;
         imageId = prgmImages;
         mainMenuCount = prgmImages.length;
@@ -58,7 +58,6 @@ public class CustomAdapter extends BaseAdapter{
                         context.startActivity(intent);
                         break;
                 }
-                Toast.makeText(context, "You Clicked "+position, Toast.LENGTH_SHORT).show();
             }
         });
         return rowView;

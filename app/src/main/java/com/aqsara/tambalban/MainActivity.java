@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements
         Context context = mainActivity;
         SharedPreferences sp = context.getSharedPreferences("appdata", Context.MODE_PRIVATE);
         String lastKnownLocation = sp.getString("last_known_location", "{}");
+        Log.d("ban", lastKnownLocation);
         JSONObject latLng = null;
         try {
             latLng = new JSONObject(lastKnownLocation);
@@ -135,11 +136,11 @@ public class MainActivity extends AppCompatActivity implements
     public void onConnected(Bundle bundle) {
         setAppLocation(LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient));
         if(!isNetworkConnected()){
-            _exit("Koneksi Internet tidak terdeteksi");
+            _exit("Tidak ada koneksi Internet");
             return;
         }
-        Toast.makeText(this, "Mohon tunggu, mencari lokasi Anda ...", Toast.LENGTH_SHORT)
-                .show();
+//        Toast.makeText(this, "Mohon tunggu, mencari lokasi Anda ...", Toast.LENGTH_SHORT)
+//                .show();
         runDelay(3000, new Runnable() {
             @Override
             public void run() {
@@ -152,12 +153,12 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onConnectionSuspended(int i) {
-        _exit("Cannot Retrieve Your Location");
+        _exit("Lokasi Anda tidak terdeteksi");
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        _exit("Cannot Retrieve Your Location");
+        _exit("Lokasi Anda tidak terdeteksi");
     }
 
     private void _exit(String message){

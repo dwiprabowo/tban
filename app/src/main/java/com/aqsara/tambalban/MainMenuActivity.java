@@ -36,7 +36,12 @@ public class MainMenuActivity extends BaseApp implements
         setContentView(R.layout.activity_main_menu);
 
         gv=(GridView) findViewById(R.id.gridView1);
-        gv.setAdapter(new CustomAdapter(this, prgmImages));
+        gv.setAdapter(new MenuAction(this, prgmImages));
+    }
+
+    @Override
+    protected String title() {
+        return "Menu Utama";
     }
 
     @Override

@@ -26,6 +26,11 @@ public class FindActivity extends BaseApp implements OnMapReadyCallback {
     }
 
     @Override
+    protected String title() {
+        return "Cari";
+    }
+
+    @Override
     public void onMapReady(GoogleMap googleMap) {
         LatLng initial = MainActivity.getInitialLatLng();
         googleMap.setMyLocationEnabled(true);
