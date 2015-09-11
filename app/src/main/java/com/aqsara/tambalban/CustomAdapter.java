@@ -54,7 +54,7 @@ public class CustomAdapter extends BaseAdapter{
             public void onClick(View v) {
                 switch (position){
                     case MainMenuConstant.MAIN_MENU_SEARCH:
-                        Intent intent = new Intent(context, MainActivity.class);
+                        Intent intent = new Intent(context, FindActivity.class);
                         context.startActivity(intent);
                         break;
                 }

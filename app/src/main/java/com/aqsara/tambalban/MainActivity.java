@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,6 +60,27 @@ public class MainActivity extends AppCompatActivity implements
         SharedPreferences.Editor editor = sp.edit();
         editor.putString("last_known_location", getAppLocationJSONString());
         editor.commit();
+    }
+
+    public static LatLng getInitialLatLng(){
+        Context context = mainActivity;
+        SharedPreferences sp = context.getSharedPreferences("appdata", Context.MODE_PRIVATE);
+        String lastKnownLocation = sp.getString("last_known_location", "{}");
+        JSONObject latLng = null;
+        try {
+            latLng = new JSONObject(lastKnownLocation);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        LatLng return_value = null;
+        if(latLng != null){
+            try {
+                return_value = new LatLng(latLng.getDouble("lat"), latLng.getDouble("lng"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return return_value;
     }
 
     public Location getAppLocation(){
@@ -113,10 +135,10 @@ public class MainActivity extends AppCompatActivity implements
     public void onConnected(Bundle bundle) {
         setAppLocation(LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient));
         if(!isNetworkConnected()){
-            _exit("Please Check Your Internet Connection");
+            _exit("Koneksi Internet tidak terdeteksi");
             return;
         }
-        Toast.makeText(this, "Please wait, retrieving your location ...", Toast.LENGTH_SHORT)
+        Toast.makeText(this, "Mohon tunggu, mencari lokasi Anda ...", Toast.LENGTH_SHORT)
                 .show();
         runDelay(3000, new Runnable() {
             @Override
