@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void _exit(String message){
-        Toast.makeText(this, "Cannot Retrieve Your Location", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         runDelay(3000, new Runnable() {
             @Override
             public void run() {

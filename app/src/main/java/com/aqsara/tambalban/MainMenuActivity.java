@@ -6,16 +6,12 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.widget.GridView;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
 
 
-public class MainMenuActivity extends BaseApp implements
-        GoogleApiClient.ConnectionCallbacks
-        , GoogleApiClient.OnConnectionFailedListener {
+public class MainMenuActivity extends BaseGoogleLogin{
 
     GoogleApiClient googleApiClient;
     Location lastKnownLocation;
@@ -36,7 +32,7 @@ public class MainMenuActivity extends BaseApp implements
         setContentView(R.layout.activity_main_menu);
 
         gv=(GridView) findViewById(R.id.gridView1);
-        gv.setAdapter(new MenuAction(this, prgmImages));
+        gv.setAdapter(new MenuCore(this, prgmImages));
     }
 
     @Override
@@ -49,22 +45,7 @@ public class MainMenuActivity extends BaseApp implements
         return true;
     }
 
-    @Override
-    public void onConnected(Bundle bundle) {
-        setAppLocation(LocationServices.FusedLocationApi.getLastLocation(googleApiClient));
-    }
-
     private void setAppLocation(Location location){
         lastKnownLocation = location;
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-
     }
 }
