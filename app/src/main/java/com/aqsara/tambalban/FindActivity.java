@@ -142,7 +142,7 @@ public class FindActivity extends BaseApp implements OnMapReadyCallback, Locatio
 
     @Override
     protected String title() {
-        return "Cari";
+        return "Cari Lokasi";
     }
 
     @Override

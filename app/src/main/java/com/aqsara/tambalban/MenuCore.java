@@ -56,9 +56,8 @@ public class MenuCore extends BaseAdapter{
         if(imageId[position] == R.drawable.user){
             Log.d("ban", "setting imageview");
             activity.setUserImageViewMenu(holder.img);
-        }else{
-            holder.img.setImageResource(imageId[position]);
         }
+        holder.img.setImageResource(imageId[position]);
         rowView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -68,10 +67,18 @@ public class MenuCore extends BaseAdapter{
                         context.startActivity(intent);
                         break;
                     case MainMenuConstant.MAIN_MENU_ADD:
-                        if(true){
+                        if(!activity.isLoggedIn()){
                             context.startActivity(new Intent(context, GoogleLoginActivity.class));
                         }
                         break;
+                    case MainMenuConstant.MAIN_MENU_USER:
+                        if(activity.isLoggedIn()){
+                            activity.logOut();
+                        }else{
+                            context.startActivity(new Intent(context, GoogleLoginActivity.class));
+                        }
+                        break;
+
                 }
             }
         });

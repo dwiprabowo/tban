@@ -37,7 +37,7 @@ public class MainMenuActivity extends BaseGoogleLogin{
 
     @Override
     protected String title() {
-        return "Menu Utama";
+        return "Lokasi TambalBan";
     }
 
     @Override

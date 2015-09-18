@@ -20,10 +20,11 @@ public abstract class BaseApp extends AppCompatActivity {
 
     private void setActionBar(){
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setLogo(R.mipmap.actionbar_logo);
-        actionBar.setDisplayUseLogoEnabled(true);
-        actionBar.setDisplayShowHomeEnabled(true);
-        actionBar.setTitle(title());
-        actionBar.setSubtitle(R.string.app_name);
+        if(actionBar != null){
+            actionBar.setLogo(R.mipmap.actionbar_logo);
+            actionBar.setDisplayUseLogoEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setTitle(title());
+        }
     }
 }

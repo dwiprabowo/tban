@@ -1,5 +1,8 @@
 package com.aqsara.tambalban;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -54,6 +57,26 @@ public class BaseGoogleLogin extends BaseApp implements
                 .build();
     }
 
+    public void logOut(){
+        if(!mGoogleApiClient.isConnected()){
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("Keluar Akun")
+                .setMessage("Sambungan dengan akun google Anda akan diputus, Anda yakin?")
+                .setPositiveButton("Ya", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+                        Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
+                        mGoogleApiClient.disconnect();
+                        imageView.setImageResource(R.drawable.user);
+                    }
+                })
+                .setNegativeButton("Tidak", null)
+                .show();
+    }
+
     @Override
     protected String title() {
         return null;
@@ -71,17 +94,17 @@ public class BaseGoogleLogin extends BaseApp implements
         mGoogleApiClient.disconnect();
     }
 
+    public boolean isLoggedIn(){
+        return mGoogleApiClient.isConnected();
+    }
+
     @Override
     public void onConnected(Bundle bundle) {
         if(Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null){
-            Log.d("ban", "user baru terinisialisasi");
             loggedInUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
             String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
             if(imageView != null){
-                Log.d("ban", "harusnya ganti gambar user");
                 setUserImage(imageView, loggedInUser.getImage().getUrl());
-            }else{
-                Log.d("ban", "imageview null");
             }
         }
     }
@@ -93,26 +116,24 @@ public class BaseGoogleLogin extends BaseApp implements
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.d("ban", "onConnectionFailed: " + connectionResult);
         if(!mIsResolving && mShouldResolve){
             if(connectionResult.hasResolution()){
                 try{
                     connectionResult.startResolutionForResult(this, RC_SIGN_IN);
                     mIsResolving = true;
                 }catch (IntentSender.SendIntentException e){
-                    Log.e("ban", "Could not resolve ConnectionResult", e);
                     mIsResolving = false;
                     mGoogleApiClient.connect();
                 }
             }else{
-                Toast.makeText(
-                        this, "connectionResult.hasResoultion() false", Toast.LENGTH_LONG
-                ).show();
+//                Toast.makeText(
+//                        this, "connectionResult.hasResoultion() false", Toast.LENGTH_LONG
+//                ).show();
             }
         }else{
-            Toast.makeText(
-                    this, "signed out", Toast.LENGTH_LONG
-            ).show();
+//            Toast.makeText(
+//                    this, "signed out", Toast.LENGTH_LONG
+//            ).show();
         }
     }
 
@@ -158,6 +179,23 @@ public class BaseGoogleLogin extends BaseApp implements
             canvas.drawColor(Color.BLACK);
             canvas.drawBitmap(bmp, borderSize, borderSize, null);
             return bmpWithBorder;
+        }
+    }
+
+    public void login(){
+        mShouldResolve = true;
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN){
+            if(resultCode != RESULT_OK){
+                mShouldResolve = false;
+            }
+            mIsResolving = false;
+            mGoogleApiClient.connect();
         }
     }
 }
