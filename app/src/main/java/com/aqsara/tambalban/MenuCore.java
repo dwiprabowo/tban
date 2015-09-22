@@ -9,9 +9,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.android.gms.common.api.GoogleApiClient;
 
 /**
  * Created by dwi on 10/09/15.
@@ -61,24 +58,31 @@ public class MenuCore extends BaseAdapter{
         rowView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent = null;
                 switch (position){
-                    case MainMenuConstant.MAIN_MENU_SEARCH:
-                        Intent intent = new Intent(context, FindActivity.class);
+                    case AppConstants.MAIN_MENU_SEARCH:
+                        intent = new Intent(context, MapActivity.class);
+                        intent.putExtra("mode", AppConstants.MAP_MODE_SEARCH);
                         context.startActivity(intent);
                         break;
-                    case MainMenuConstant.MAIN_MENU_ADD:
+                    case AppConstants.MAIN_MENU_ADD:
                         if(!activity.isLoggedIn()){
                             context.startActivity(new Intent(context, GoogleLoginActivity.class));
+                        }else{
+                            intent = new Intent(context, MapActivity.class);
+                            intent.putExtra("mode", AppConstants.MAP_MODE_ADD);
+                            context.startActivity(intent);
                         }
                         break;
-                    case MainMenuConstant.MAIN_MENU_USER:
+                    case AppConstants.MAIN_MENU_USER:
                         if(activity.isLoggedIn()){
                             activity.logOut();
                         }else{
                             context.startActivity(new Intent(context, GoogleLoginActivity.class));
                         }
                         break;
-
+                    case AppConstants.MAIN_MENU_INFO:
+                        break;
                 }
             }
         });

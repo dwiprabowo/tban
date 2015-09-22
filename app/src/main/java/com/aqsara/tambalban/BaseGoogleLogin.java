@@ -106,6 +106,7 @@ public class BaseGoogleLogin extends BaseApp implements
             if(imageView != null){
                 setUserImage(imageView, loggedInUser.getImage().getUrl());
             }
+            Log.d("ban", loggedInUser.toString());
         }
     }
 
@@ -125,15 +126,7 @@ public class BaseGoogleLogin extends BaseApp implements
                     mIsResolving = false;
                     mGoogleApiClient.connect();
                 }
-            }else{
-//                Toast.makeText(
-//                        this, "connectionResult.hasResoultion() false", Toast.LENGTH_LONG
-//                ).show();
             }
-        }else{
-//            Toast.makeText(
-//                    this, "signed out", Toast.LENGTH_LONG
-//            ).show();
         }
     }
 
@@ -159,7 +152,6 @@ public class BaseGoogleLogin extends BaseApp implements
                 InputStream in = new java.net.URL(urldisplay).openStream();
                 mIcon11 = BitmapFactory.decodeStream(in);
             } catch (Exception e) {
-                Log.e("Error", e.getMessage());
                 e.printStackTrace();
             }
             return mIcon11;
@@ -170,13 +162,18 @@ public class BaseGoogleLogin extends BaseApp implements
         }
 
         private Bitmap addWhiteBorder(Bitmap bmp, int borderSize) {
+            int color = Color.BLACK;
+            if(bmp == null){
+                bmp = BitmapFactory.decodeResource(getResources(), R.drawable.user);
+                color = Color.TRANSPARENT;
+            }
             Bitmap bmpWithBorder = Bitmap.createBitmap(
                     bmp.getWidth() + borderSize * 2
                     , bmp.getHeight() + borderSize * 2
                     , bmp.getConfig()
             );
             Canvas canvas = new Canvas(bmpWithBorder);
-            canvas.drawColor(Color.BLACK);
+            canvas.drawColor(color);
             canvas.drawBitmap(bmp, borderSize, borderSize, null);
             return bmpWithBorder;
         }

@@ -48,7 +48,7 @@
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name=".FindActivity"
+            android:name=".MapActivity"
             android:configChanges="keyboardHidden|orientation"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >

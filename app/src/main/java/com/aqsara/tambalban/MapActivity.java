@@ -1,25 +1,25 @@
 package com.aqsara.tambalban;
 
-import android.content.Context;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.ContextThemeWrapper;
+import android.view.Gravity;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import android.app.Fragment;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.util.Log;
-import android.widget.ListView;
+import com.google.android.gms.plus.model.people.Person;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,117 +32,50 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
 /**
  * Created by dwi on 11/09/15.
  */
-public class FindActivity extends BaseApp implements OnMapReadyCallback, LocationListener {
+public class MapActivity extends BaseGoogleLogin implements OnMapReadyCallback, LocationListener {
 
     GoogleMap mGoogleMap;
-    String base_api_url = "http://10.42.0.20/api/web/locations";
+    String base_api_url = "http://10.42.0.20/api/web/";
 
-    private DrawerLayout mDrawerLayout;
-    private ListView mDrawerList;
-    private ActionBarDrawerToggle mDrawerToggle;
-
-    private CharSequence mDrawerTitle;
-    private CharSequence mTitle;
-    private String[] mMenuTitles;
-
-    private LocationManager locationManager;
-    private static final long MIN_TIME = 400;
-    private static final float MIN_DISTANCE = 1000;
-
-    private boolean addMode = false;
+    int mode = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_find);
+        setContentView(R.layout.activity_map);
+        mode = getIntent().getIntExtra("mode", 0);
 
         SupportMapFragment mapFragment = (SupportMapFragment)
                 getSupportFragmentManager().findFragmentById(R.id.find_map_fragment);
         mapFragment.getMapAsync(this);
-
         mGoogleMap = mapFragment.getMap();
-//        mGoogleMap.setMyLocationEnabled(true);
-//        LatLng latestLocation = latestLocation();
-//        if(latestLocation != null){
-//            Log.d("location", "Get latest Location!");
-//            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latestLocation, 15));
-//        }else{
-//            Log.d("location", "set default Location!");
-//            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-7.5534545, 110.6686321), 9));
-//        }
-//        mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-//            @Override
-//            public void onMapClick(LatLng latlng) {
-//                if (addMode) {
-//                    addMarker(latlng);
-//                    sendToServer(latlng);
-//                }
-//            }
-//        });
 
-        new RetrieveTask().execute();
-
-//        initDrawer(savedInstanceState);
-    }
-
-    LatLng latestLocation(){
-        LatLng result = null;
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, this);
-
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if(location != null && location.getTime() > Calendar.getInstance().getTimeInMillis() - 2 * 60 * 1000) {
-            result = new LatLng(location.getLatitude(), location.getLongitude());
+        switch (mode){
+            case AppConstants.MAP_MODE_SEARCH:
+                new RetrieveTask().execute();
+                getSupportActionBar().setTitle("Cari Lokasi");
+                break;
+            case AppConstants.MAP_MODE_ADD:
+                getSupportActionBar().setTitle("Tambah Lokasi");
+                mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                    @Override
+                    public void onMapClick(LatLng latLng) {
+                        addMarker(latLng);
+                    }
+                });
+                break;
         }
-        return result;
     }
-
-//    void initDrawer(Bundle savedInstanceState){
-//        mTitle = mDrawerTitle = getTitle();
-//        mMenuTitles = getResources().getStringArray(R.array.menus_array);
-//        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        mDrawerList = (ListView) findViewById(R.id.left_drawer);
-//
-//        // set a custom shadow that overlays the main content when the drawer opens
-//        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-//        // set up the drawer's list view with items and click listener
-//        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-//                R.layout.drawer_list_item, mMenuTitles));
-//        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-//
-//        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close){
-//            @Override
-//            public void onDrawerClosed(View drawerView) {
-//                getSupportActionBar().setTitle(mTitle);
-//                invalidateOptionsMenu();
-//            }
-//
-//            @Override
-//            public void onDrawerOpened(View drawerView) {
-//                getSupportActionBar().setTitle(mTitle);
-//                invalidateOptionsMenu();
-//            }
-//        };
-//
-//        mDrawerLayout.setDrawerListener(mDrawerToggle);
-//
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//
-//        if (savedInstanceState == null) {
-//            selectItem(0);
-//        }
-//    }
 
     @Override
     protected String title() {
-        return "Cari Lokasi";
+        return null;
     }
 
     @Override
@@ -150,18 +83,51 @@ public class FindActivity extends BaseApp implements OnMapReadyCallback, Locatio
         LatLng initial = MainActivity.getInitialLatLng();
         googleMap.setMyLocationEnabled(true);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initial, 16));
-//        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initial, 15));
     }
 
-    private void addMarker(LatLng latlng){
-        MarkerOptions markerOptions = new MarkerOptions();
+    private void addMarker(final LatLng latlng){
+        final MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latlng);
         markerOptions.title(latlng.latitude + "," + latlng.longitude);
-        mGoogleMap.addMarker(markerOptions);
-    }
-
-    private void sendToServer(LatLng latlng){
-        new SaveTask().execute(latlng);
+        final Marker marker = mGoogleMap.addMarker(markerOptions);
+        if(mode == AppConstants.MAP_MODE_ADD){
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(latlng.latitude-0.004, latlng.longitude), 16)
+            );
+            AlertDialog.Builder builder = new AlertDialog.Builder(
+                    new ContextThemeWrapper(this, R.style.DialogSlideAnim)
+            );
+            AlertDialog dialog = builder
+            .setMessage(
+                    "Anda akan menambahkan lokasi pada latitude: "
+                    +latlng.latitude
+                    +" dan longitude: "
+                    +latlng.longitude
+                    +"\ndata tambahan: "
+            )
+            .setPositiveButton("Tambahkan", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                   new SaveTask().execute(
+                           getUser().toString()
+                           , String.valueOf(latlng.latitude)
+                           , String.valueOf(latlng.longitude)
+                   );
+                }
+            })
+            .setNegativeButton("Batal", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    marker.remove();
+                }
+            })
+            .create();
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            WindowManager.LayoutParams wmlp = dialog.getWindow().getAttributes();
+            wmlp.gravity = Gravity.BOTTOM;
+            wmlp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            dialog.show();
+        }
     }
 
     @Override
@@ -184,13 +150,19 @@ public class FindActivity extends BaseApp implements OnMapReadyCallback, Locatio
 
     }
 
-    private class SaveTask extends AsyncTask<LatLng, Void, Void> {
+    private class SaveTask extends AsyncTask<String, Void, String> {
         @Override
-        protected Void doInBackground(LatLng... params) {
-            String lat = Double.toString(params[0].latitude);
-            String lng = Double.toString(params[0].longitude);
-            String strUrl = base_api_url;
+        protected String doInBackground(String... params) {
+            String user = params[0];
+            String lat = params[1];
+            String lng = params[2];
+            Log.d("ban", "user: "+user);
+            Log.d("ban", "lat: "+lat);
+            Log.d("ban", "lng: "+lng);
+            String strUrl = base_api_url+"add_user_locations";
             URL url = null;
+
+            StringBuffer sb = new StringBuffer();
             try{
                 url = new URL(strUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -198,14 +170,12 @@ public class FindActivity extends BaseApp implements OnMapReadyCallback, Locatio
                 connection.setDoOutput(true);
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
 
-                outputStreamWriter.write("lat=" + lat + "&lng="+lng);
+                outputStreamWriter.write("google_user_data="+ user + "&latitude=" + lat + "&longitude="+lng);
                 outputStreamWriter.flush();
                 outputStreamWriter.close();
 
                 InputStream iStream = connection.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(iStream));
-
-                StringBuffer sb = new StringBuffer();
 
                 String line = "";
 
@@ -213,6 +183,7 @@ public class FindActivity extends BaseApp implements OnMapReadyCallback, Locatio
                     sb.append(line);
                 }
 
+                Log.d("ban", sb.toString());
                 reader.close();
                 iStream.close();
             }catch(MalformedURLException e){
@@ -220,15 +191,16 @@ public class FindActivity extends BaseApp implements OnMapReadyCallback, Locatio
             }catch (IOException e){
                 e.printStackTrace();
             }
-            return null;
+            return sb.toString();
         }
+
     }
 
     private class RetrieveTask extends AsyncTask<Void, Void, String>{
 
         @Override
         protected String doInBackground(Void... params) {
-            String strUrl = base_api_url;
+            String strUrl = base_api_url+"get_locations";
             URL url = null;
             StringBuffer sb = new StringBuffer();
             try{
@@ -241,7 +213,6 @@ public class FindActivity extends BaseApp implements OnMapReadyCallback, Locatio
                 while((line=reader.readLine()) != null){
                     sb.append(line);
                 }
-
                 reader.close();
                 iStream.close();
             }catch (MalformedURLException e){
