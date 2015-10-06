@@ -6,6 +6,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -156,7 +157,7 @@ public class MapActivity extends BaseGoogleLogin implements OnMapReadyCallback, 
             String user = params[0];
             String lat = params[1];
             String lng = params[2];
-            Log.d("ban", "user: "+user);
+            Log.d("ban", "user: "+user.replace("&", "#dan#"));
             Log.d("ban", "lat: "+lat);
             Log.d("ban", "lng: "+lng);
             String strUrl = base_api_url+"add_user_locations";
@@ -170,7 +171,7 @@ public class MapActivity extends BaseGoogleLogin implements OnMapReadyCallback, 
                 connection.setDoOutput(true);
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
 
-                outputStreamWriter.write("google_user_data="+ user + "&latitude=" + lat + "&longitude="+lng);
+                outputStreamWriter.write("google_user_data="+ user.replace("&", "#dan#") + "&latitude=" + lat + "&longitude="+lng);
                 outputStreamWriter.flush();
                 outputStreamWriter.close();
 
