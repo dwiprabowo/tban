@@ -78,6 +78,9 @@ public class MainActivity extends AppCompatActivity implements
             try {
                 return_value = new LatLng(latLng.getDouble("lat"), latLng.getDouble("lng"));
             } catch (JSONException e) {
+                Double lat = -7.47895799208485400;
+                Double lng = 110.22654052823782000;
+                return_value = new LatLng(lat, lng);
                 e.printStackTrace();
             }
         }
@@ -144,7 +147,8 @@ public class MainActivity extends AppCompatActivity implements
         runDelay(3000, new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(MainActivity.this, MainMenuActivity.class);
+//                Intent intent = new Intent(MainActivity.this, MainMenuActivity.class);
+                Intent intent = new Intent(MainActivity.this, NewMainActivity.class);
                 MainActivity.this.finish();
                 startActivity(intent);
             }
