@@ -70,7 +70,9 @@ public class BaseGoogleLogin extends BaseApp implements
                         Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
                         Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
                         mGoogleApiClient.disconnect();
-                        imageView.setImageResource(R.drawable.user);
+//                        imageView.setImageResource(R.drawable.user);
+                        StaticData.deleteUser(BaseGoogleLogin.this);
+                        BaseGoogleLogin.this.finish();
                     }
                 })
                 .setNegativeButton("Tidak", null)
@@ -102,12 +104,19 @@ public class BaseGoogleLogin extends BaseApp implements
     public void onConnected(Bundle bundle) {
         if(Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null){
             loggedInUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-            String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
+//            String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
             if(imageView != null){
                 setUserImage(imageView, loggedInUser.getImage().getUrl());
             }
             Log.d("ban", loggedInUser.toString());
         }
+    }
+
+    public String getUserName(){
+        if(loggedInUser != null){
+            return loggedInUser.getDisplayName();
+        }
+        return null;
     }
 
     @Override

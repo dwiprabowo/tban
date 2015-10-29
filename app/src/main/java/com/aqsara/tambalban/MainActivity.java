@@ -147,8 +147,14 @@ public class MainActivity extends AppCompatActivity implements
         runDelay(3000, new Runnable() {
             @Override
             public void run() {
+                Intent intent = null;
 //                Intent intent = new Intent(MainActivity.this, MainMenuActivity.class);
-                Intent intent = new Intent(MainActivity.this, NewMainActivity.class);
+                if (StaticData.getUser(MainActivity.this) != null) {
+                    intent = new Intent(MainActivity.this, NewMainActivity.class);
+
+                } else {
+                    intent = new Intent(MainActivity.this, LoginActivity.class);
+                }
                 MainActivity.this.finish();
                 startActivity(intent);
             }

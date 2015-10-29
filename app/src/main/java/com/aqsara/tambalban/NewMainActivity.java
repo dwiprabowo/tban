@@ -1,17 +1,20 @@
 package com.aqsara.tambalban;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -38,7 +41,7 @@ import java.util.List;
 /**
  * Created by dwi on 013, 10/13/15.
  */
-public class NewMainActivity extends AppCompatActivity implements OnMapReadyCallback{
+public class NewMainActivity extends BaseGoogleLogin implements OnMapReadyCallback{
 
     private ListView mDrawerList;
     private final ThreadLocal<ArrayAdapter<String>> mAdapter = new ThreadLocal<>();
@@ -51,6 +54,11 @@ public class NewMainActivity extends AppCompatActivity implements OnMapReadyCall
     String base_api_url = "http://10.42.0.20/api/web/";
 
     @Override
+    protected String title() {
+        return getString(R.string.app_name);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_main);
@@ -58,9 +66,30 @@ public class NewMainActivity extends AppCompatActivity implements OnMapReadyCall
         mDrawerList = (ListView) findViewById(R.id.navList);
         addDrawerItems();
 
+        LayoutInflater inflater = getLayoutInflater();
+        View listHeaderView = inflater.inflate(R.layout.header_list, null, false);
+        mDrawerList.addHeaderView(listHeaderView);
+
+//        setUserImage((ImageView) findViewById(R.id.headerImageCirle), );
+        try {
+            TextView headerProfileName = (TextView) findViewById(R.id.header_profile_name);
+            headerProfileName.setText(StaticData.getUser(this).getString("displayName"));
+            Log.d("ban", StaticData.getUser(this).getString("image").toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                switch (position){
+                    case 0:
+                        if(NewMainActivity.this.isLoggedIn()){
+                            NewMainActivity.this.logOut();
+                        }
+                        break;
+                }
                 Toast.makeText(
                         NewMainActivity.this
                         , "Menu #"+position+" selected!"
