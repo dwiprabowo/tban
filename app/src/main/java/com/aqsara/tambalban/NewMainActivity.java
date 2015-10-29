@@ -1,5 +1,7 @@
 package com.aqsara.tambalban;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
@@ -7,9 +9,13 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -21,6 +27,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -32,6 +39,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -70,7 +78,6 @@ public class NewMainActivity extends BaseGoogleLogin implements OnMapReadyCallba
         View listHeaderView = inflater.inflate(R.layout.header_list, null, false);
         mDrawerList.addHeaderView(listHeaderView);
 
-//        setUserImage((ImageView) findViewById(R.id.headerImageCirle), );
         try {
             TextView headerProfileName = (TextView) findViewById(R.id.header_profile_name);
             headerProfileName.setText(StaticData.getUser(this).getString("displayName"));
@@ -114,13 +121,26 @@ public class NewMainActivity extends BaseGoogleLogin implements OnMapReadyCallba
         mGoogleMap = mapFragment.getMap();
 
         new RetrieveTask().execute();
+
+        mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                addMarker(latLng, true, true);
+            }
+        });
     }
 
     private class RetrieveTask extends AsyncTask<Void, Void, String>{
 
         @Override
         protected String doInBackground(Void... params) {
-            String strUrl = base_api_url + "get_locations";
+            String user_id = null;
+            try{
+                user_id = StaticData.getUser(NewMainActivity.this).getString("id");
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            String strUrl = base_api_url + "get_locations/" + user_id;
             URL url = null;
             StringBuffer sb = new StringBuffer();
             try{
@@ -170,19 +190,118 @@ public class NewMainActivity extends BaseGoogleLogin implements OnMapReadyCallba
             super.onPostExecute(hashMaps);
             for(int i=0;i< hashMaps.size();i++){
                 HashMap<String, String> marker = hashMaps.get(i);
+                Log.d("ban", "marker value: "+marker.toString());
                 LatLng latLng = new LatLng(
                     Double.parseDouble(marker.get("latitude")),
                         Double.parseDouble(marker.get("longitude"))
                 );
-                addMarker(latLng);
+                boolean pending = Boolean.parseBoolean(marker.get("is_pending"));
+                addMarker(latLng, pending, false);
             }
         }
     }
 
     private void addMarker(final LatLng latLng){
+        addMarker(latLng, false, true);
+    }
+
+    private void addMarker(final LatLng latLng, boolean add, boolean confirm){
         final MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
+        if(add){
+            markerOptions.icon(
+                    BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+            );
+        }
         final Marker marker = mGoogleMap.addMarker(markerOptions);
+        if(add && confirm){
+            addLocation(latLng, marker);
+        }
+    }
+
+    private void addLocation(final LatLng latlng, final Marker marker){
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(latlng.latitude-0.002, latlng.longitude), 16)
+        );
+        AlertDialog.Builder builder = new AlertDialog.Builder(
+                new ContextThemeWrapper(this, R.style.DialogSlideAnim)
+        );
+        AlertDialog dialog = builder
+                .setMessage(
+                        "Anda akan menambahkan lokasi pada latitude: "
+                                + latlng.latitude
+                                + " dan longitude: "
+                                + latlng.longitude
+                                + "\ndata tambahan: "
+                )
+                .setPositiveButton("Tambahkan", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        new SaveTask().execute(
+                                getUser().toString()
+                                , String.valueOf(latlng.latitude)
+                                , String.valueOf(latlng.longitude)
+                        );
+                    }
+                })
+                .setNegativeButton("Batal", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        marker.remove();
+                    }
+                })
+                .create();
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        WindowManager.LayoutParams wmlp = dialog.getWindow().getAttributes();
+        wmlp.gravity = Gravity.BOTTOM;
+        wmlp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        dialog.show();
+    }
+
+    private class SaveTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... params) {
+            String user = params[0];
+            String lat = params[1];
+            String lng = params[2];
+            Log.d("ban", "user: "+user.replace("&", "#dan#"));
+            Log.d("ban", "lat: "+lat);
+            Log.d("ban", "lng: "+lng);
+            String strUrl = base_api_url+"add_user_locations";
+            URL url = null;
+
+            StringBuffer sb = new StringBuffer();
+            try{
+                url = new URL(strUrl);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setDoOutput(true);
+                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
+
+                outputStreamWriter.write("google_user_data="+ user.replace("&", "#dan#") + "&latitude=" + lat + "&longitude="+lng);
+                outputStreamWriter.flush();
+                outputStreamWriter.close();
+
+                InputStream iStream = connection.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(iStream));
+
+                String line = "";
+
+                while((line=reader.readLine()) != null){
+                    sb.append(line);
+                }
+
+                Log.d("ban", sb.toString());
+                reader.close();
+                iStream.close();
+            }catch(MalformedURLException e){
+                e.printStackTrace();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+            return sb.toString();
+        }
+
     }
 
     private void setupDrawer() {

@@ -57,6 +57,7 @@ public class MarkerJSONParser {
         HashMap<String, String> marker = new HashMap<String, String>();
         String lat = "-NA-";
         String lng = "-NA-";
+        String is_pending = "false";
 
         Log.d("ban", jMarker.toString());
         try{
@@ -68,8 +69,13 @@ public class MarkerJSONParser {
                 lng = jMarker.getString("longitude");
             }
 
+            if(!jMarker.isNull("is_pending")){
+                is_pending = jMarker.getString("is_pending");
+            }
+
             marker.put("latitude", lat);
             marker.put("longitude", lng);
+            marker.put("is_pending", is_pending);
         }catch (JSONException e){
             e.printStackTrace();
         }
