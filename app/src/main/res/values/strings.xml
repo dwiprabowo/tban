@@ -16,4 +16,7 @@
     <string name="close">Close</string>
     <string name="title_activity_main_menu">Main Menu</string>
     <string name="title_activity_user_profile">UserProfileActivity</string>
+    <string name="title_activity_help">HelpActivity</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="title_activity_root_help">Bantuan</string>
 </resources>

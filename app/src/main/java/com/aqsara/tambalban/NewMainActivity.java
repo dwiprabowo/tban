@@ -96,12 +96,10 @@ public class NewMainActivity extends BaseGoogleLogin implements OnMapReadyCallba
                             NewMainActivity.this.logOut();
                         }
                         break;
+                    case 1:
+                            startActivity(new Intent(NewMainActivity.this, RootHelpActivity.class));
+                        break;
                 }
-                Toast.makeText(
-                        NewMainActivity.this
-                        , "Menu #"+position+" selected!"
-                        , Toast.LENGTH_SHORT
-                ).show();
             }
         });
 
@@ -327,8 +325,8 @@ public class NewMainActivity extends BaseGoogleLogin implements OnMapReadyCallba
     }
 
     private void addDrawerItems() {
-        String[] menus = {"Bantuan", "Tentang"};
-        mAdapter.set(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, menus));
+        String[] menus = {"INFO"};
+        mAdapter.set(new ArrayAdapter<>(this, R.layout.drawer_menu_item, menus));
         mDrawerList.setAdapter(mAdapter.get());
     }
 
