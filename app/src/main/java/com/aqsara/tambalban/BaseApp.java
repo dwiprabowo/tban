@@ -1,13 +1,9 @@
 package com.aqsara.tambalban;
 
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 
-/**
- * Created by dwi on 11/09/15.
- */
 public abstract class BaseApp extends AppCompatActivity {
 
     @Override

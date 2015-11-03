@@ -10,28 +10,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * Created by dwijpr on 24/05/15.
- */
 public class MarkerJSONParser {
 
     public List<HashMap<String, String>> parse(JSONObject jObject){
         JSONArray jMarkers = new JSONArray();
 
-        Log.d("ban", jObject.toString());
-        if(jObject != null){
-            try{
-                JSONArray object = jObject.getJSONArray("data");
-                Log.d("ban", object.toString());
-//                Log.d("ban", object.get("longitude").toString());
-//                Log.d("ban", object.get("latitude").toString());
+        try{
+            jMarkers = new JSONArray();
 
-                jMarkers = new JSONArray();
-
-                jMarkers = jObject.getJSONArray("data");
-            }catch (JSONException e){
-                e.printStackTrace();
-            }
+            jMarkers = jObject.getJSONArray("data");
+        }catch (JSONException e){
+            e.printStackTrace();
         }
 
         return getMarkers(jMarkers);
@@ -39,8 +28,8 @@ public class MarkerJSONParser {
 
     private List<HashMap<String, String>> getMarkers(JSONArray jMarkers){
         int markersCount = jMarkers.length();
-        List<HashMap<String, String>> markersList = new ArrayList<HashMap<String, String>>();
-        HashMap<String, String> marker = null;
+        List<HashMap<String, String>> markersList = new ArrayList<>();
+        HashMap<String, String> marker;
 
         for(int i = 0; i < markersCount;i++){
             try{
@@ -54,12 +43,11 @@ public class MarkerJSONParser {
     }
 
     private HashMap<String, String> getMarker(JSONObject jMarker){
-        HashMap<String, String> marker = new HashMap<String, String>();
+        HashMap<String, String> marker = new HashMap<>();
         String lat = "-NA-";
         String lng = "-NA-";
         String is_pending = "false";
 
-        Log.d("ban", jMarker.toString());
         try{
             if(!jMarker.isNull("latitude")){
                 lat = jMarker.getString("latitude");

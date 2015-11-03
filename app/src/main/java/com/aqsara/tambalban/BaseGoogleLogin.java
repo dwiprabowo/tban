@@ -4,16 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.media.Image;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
@@ -22,11 +13,6 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 
-import java.io.InputStream;
-
-/**
- * Created by dwi on 015, 9/15/15.
- */
 public class BaseGoogleLogin extends BaseApp implements
         GoogleApiClient.ConnectionCallbacks
         , GoogleApiClient.OnConnectionFailedListener {
@@ -38,8 +24,6 @@ public class BaseGoogleLogin extends BaseApp implements
     private boolean mShouldResolve = false;
 
     private Person loggedInUser = null;
-
-    private ImageView imageView = null;
 
     public Person getUser(){
         return loggedInUser;
@@ -104,20 +88,15 @@ public class BaseGoogleLogin extends BaseApp implements
     public void onConnected(Bundle bundle) {
         if(Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null){
             loggedInUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-//            String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
-            if(imageView != null){
-                setUserImage(imageView, loggedInUser.getImage().getUrl());
-            }
-            Log.d("ban", loggedInUser.toString());
         }
     }
 
-    public String getUserName(){
-        if(loggedInUser != null){
-            return loggedInUser.getDisplayName();
-        }
-        return null;
-    }
+//    public String getUserName(){
+//        if(loggedInUser != null){
+//            return loggedInUser.getDisplayName();
+//        }
+//        return null;
+//    }
 
     @Override
     public void onConnectionSuspended(int i) {
@@ -139,54 +118,54 @@ public class BaseGoogleLogin extends BaseApp implements
         }
     }
 
-    public void setUserImage(ImageView imageView, String url){
-        new DownloadImageTask(imageView).execute(url);
-    }
+//    public void setUserImage(ImageView imageView, String url){
+//        new DownloadImageTask(imageView).execute(url);
+//    }
 
-    public void setUserImageViewMenu(ImageView imageView){
-        this.imageView = imageView;
-    }
+//    public void setUserImageViewMenu(ImageView imageView){
+//        this.imageView = imageView;
+//    }
 
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
-
-        public DownloadImageTask(ImageView bmImage) {
-            this.bmImage = bmImage;
-        }
-
-        protected Bitmap doInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap mIcon11 = null;
-            try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return mIcon11;
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            bmImage.setImageBitmap(addWhiteBorder(result, 5));
-        }
-
-        private Bitmap addWhiteBorder(Bitmap bmp, int borderSize) {
-            int color = Color.BLACK;
-            if(bmp == null){
-                bmp = BitmapFactory.decodeResource(getResources(), R.drawable.user);
-                color = Color.TRANSPARENT;
-            }
-            Bitmap bmpWithBorder = Bitmap.createBitmap(
-                    bmp.getWidth() + borderSize * 2
-                    , bmp.getHeight() + borderSize * 2
-                    , bmp.getConfig()
-            );
-            Canvas canvas = new Canvas(bmpWithBorder);
-            canvas.drawColor(color);
-            canvas.drawBitmap(bmp, borderSize, borderSize, null);
-            return bmpWithBorder;
-        }
-    }
+//    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+//        ImageView bmImage;
+//
+//        public DownloadImageTask(ImageView bmImage) {
+//            this.bmImage = bmImage;
+//        }
+//
+//        protected Bitmap doInBackground(String... urls) {
+//            String urldisplay = urls[0];
+//            Bitmap mIcon11 = null;
+//            try {
+//                InputStream in = new java.net.URL(urldisplay).openStream();
+//                mIcon11 = BitmapFactory.decodeStream(in);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            return mIcon11;
+//        }
+//
+//        protected void onPostExecute(Bitmap result) {
+////            bmImage.setImageBitmap(addWhiteBorder(result, 5));
+//        }
+//
+////        private Bitmap addWhiteBorder(Bitmap bmp, int borderSize) {
+////            int color = Color.BLACK;
+////            if(bmp == null){
+////                bmp = BitmapFactory.decodeResource(getResources(), R.drawable.user);
+////                color = Color.TRANSPARENT;
+////            }
+////            Bitmap bmpWithBorder = Bitmap.createBitmap(
+////                    bmp.getWidth() + borderSize * 2
+////                    , bmp.getHeight() + borderSize * 2
+////                    , bmp.getConfig()
+////            );
+////            Canvas canvas = new Canvas(bmpWithBorder);
+////            canvas.drawColor(color);
+////            canvas.drawBitmap(bmp, borderSize, borderSize, null);
+////            return bmpWithBorder;
+////        }
+//    }
 
     public void login(){
         mShouldResolve = true;

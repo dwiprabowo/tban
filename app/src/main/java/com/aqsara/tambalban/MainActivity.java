@@ -1,197 +1,341 @@
 package com.aqsara.tambalban;
 
-import android.content.Context;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.location.Location;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
-import android.view.Menu;
+import android.view.ContextThemeWrapper;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
-import android.widget.ImageView;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements
-    GoogleApiClient.ConnectionCallbacks
-    , GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback{
 
-    GoogleApiClient mGoogleApiClient;
-    boolean appReady = false;
+    private ListView mDrawerList;
+    private final ThreadLocal<ArrayAdapter<String>> mAdapter = new ThreadLocal<>();
 
-    public static Context mainActivity;
-    public static final String INITIAL_LOCATION = "initial_location";
+    private ActionBarDrawerToggle mDrawerToggle;
+    private DrawerLayout mDrawerLayout;
+    private String mActivityTitle;
 
-    private static Location appLocation;
+    GoogleMap mGoogleMap;
+    String base_api_url = "http://10.42.0.20/api/web/";
 
-    protected synchronized void buildGoogleApiClient(){
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-        mGoogleApiClient.connect();
-    }
-
-    public void setAppLocation(Location lastKnownLocation){
-        appLocation = lastKnownLocation;
-        Context context = mainActivity;
-        SharedPreferences sp = context.getSharedPreferences(
-                "appdata"
-                , Context.MODE_PRIVATE
-        );
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putString("last_known_location", getAppLocationJSONString());
-        editor.commit();
-    }
-
-    public static LatLng getInitialLatLng(){
-        Context context = mainActivity;
-        SharedPreferences sp = context.getSharedPreferences("appdata", Context.MODE_PRIVATE);
-        String lastKnownLocation = sp.getString("last_known_location", "{}");
-        Log.d("ban", lastKnownLocation);
-        JSONObject latLng = null;
-        try {
-            latLng = new JSONObject(lastKnownLocation);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        LatLng return_value = null;
-        if(latLng != null){
-            try {
-                return_value = new LatLng(latLng.getDouble("lat"), latLng.getDouble("lng"));
-            } catch (JSONException e) {
-                Double lat = -7.47895799208485400;
-                Double lng = 110.22654052823782000;
-                return_value = new LatLng(lat, lng);
-                e.printStackTrace();
-            }
-        }
-        return return_value;
-    }
-
-    public Location getAppLocation(){
-        return appLocation;
-    }
-
-    public String getAppLocationJSONString(){
-        Location location = getAppLocation();
-        if(location == null){
-            return null;
-        }
-        JSONObject jsonValue = new JSONObject();
-        try {
-            jsonValue.put("lat", location.getLatitude());
-            jsonValue.put("lng", location.getLongitude());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return jsonValue.toString();
+    @Override
+    protected String title() {
+        return getString(R.string.app_name);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mainActivity = this;
-        getSupportActionBar().hide();
-        setContentView(R.layout.activity_main);
-        buildGoogleApiClient();
-        animateWheel();
-    }
+        setContentView(R.layout.activity_new_main);
 
-    private void animateWheel(){
-        RotateAnimation anim = new RotateAnimation(
-                0f, 359f
-                ,RotateAnimation.RELATIVE_TO_SELF, .5f, RotateAnimation.RELATIVE_TO_SELF, .5f
-        );
-        anim.setInterpolator(new LinearInterpolator());
-        anim.setRepeatCount(Animation.INFINITE);
-        anim.setDuration(2400);
+        mDrawerList = (ListView) findViewById(R.id.navList);
+        addDrawerItems();
 
-        final ImageView wheel = (ImageView) findViewById(R.id.imageView);
-        wheel.startAnimation(anim);
-    }
+        LayoutInflater inflater = getLayoutInflater();
+        View listHeaderView;
+        listHeaderView = inflater.inflate(R.layout.header_list, null, false);
+        mDrawerList.addHeaderView(listHeaderView);
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        return true;
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        setAppLocation(LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient));
-        if(!isNetworkConnected()){
-            _exit("Tidak ada koneksi Internet");
-            return;
+        try {
+            TextView headerProfileName = (TextView) findViewById(R.id.header_profile_name);
+            headerProfileName.setText(StaticData.getUser(this).getString("displayName"));
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-//        Toast.makeText(this, "Mohon tunggu, mencari lokasi Anda ...", Toast.LENGTH_SHORT)
-//                .show();
-        runDelay(3000, new Runnable() {
-            @Override
-            public void run() {
-                Intent intent = null;
-//                Intent intent = new Intent(MainActivity.this, MainMenuActivity.class);
-                if (StaticData.getUser(MainActivity.this) != null) {
-                    intent = new Intent(MainActivity.this, NewMainActivity.class);
 
-                } else {
-                    intent = new Intent(MainActivity.this, LoginActivity.class);
+        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                switch (position){
+                    case 0:
+                        if(MainActivity.this.isLoggedIn()){
+                            MainActivity.this.logOut();
+                        }
+                        break;
+                    case 1:
+                            startActivity(new Intent(MainActivity.this, HelpActivity.class));
+                        break;
                 }
-                MainActivity.this.finish();
-                startActivity(intent);
             }
         });
-    }
 
-    @Override
-    public void onConnectionSuspended(int i) {
-        _exit("Lokasi Anda tidak terdeteksi");
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        _exit("Lokasi Anda tidak terdeteksi");
-    }
-
-    private void _exit(String message){
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-        runDelay(3000, new Runnable() {
-            @Override
-            public void run() {
-                MainActivity.this.finish();
-            }
-        });
-    }
-
-    private void runDelay(long milis, Runnable r){
-        Handler h = new Handler();
-        h.postDelayed(r, milis);
-    }
-
-    private boolean isNetworkConnected(){
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
-        NetworkInfo ni = cm.getActiveNetworkInfo();
-        if(ni == null){
-            return false;
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
         }
-        return true;
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mActivityTitle = getTitle().toString();
+        
+        setupDrawer();
+
+        SupportMapFragment mapFragment = (SupportMapFragment)
+                getSupportFragmentManager().findFragmentById(R.id.map_fragment);
+        mapFragment.getMapAsync(this);
+        mGoogleMap = mapFragment.getMap();
+
+        new RetrieveTask().execute();
+
+        mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                addMarker(latLng, true, true);
+            }
+        });
+    }
+
+    private class RetrieveTask extends AsyncTask<Void, Void, String>{
+
+        @Override
+        protected String doInBackground(Void... params) {
+            String user_id = null;
+            try{
+                user_id = StaticData.getUser(MainActivity.this).getString("id");
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            String strUrl = base_api_url + "get_locations/" + user_id;
+            URL url;
+            StringBuffer sb;
+            sb = new StringBuffer();
+            try{
+                url = new URL(strUrl);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+                InputStream iStream = connection.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(iStream));
+                String line;
+                while ((line=reader.readLine()) != null){
+                    sb.append(line);
+                }
+                reader.close();
+                iStream.close();
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+            return sb.toString();
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            new ParserTask().execute(s);
+        }
+    }
+
+    private class ParserTask extends AsyncTask<String, Void, List<HashMap<String, String>>>{
+
+        @Override
+        protected List<HashMap<String, String>> doInBackground(String... params) {
+            MarkerJSONParser markerParser = new MarkerJSONParser();
+            JSONObject json = null;
+            try{
+                json = new JSONObject(params[0]);
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+            return markerParser.parse(json);
+        }
+
+        @Override
+        protected void onPostExecute(List<HashMap<String, String>> hashMaps) {
+            super.onPostExecute(hashMaps);
+            for(int i=0;i< hashMaps.size();i++){
+                HashMap<String, String> marker = hashMaps.get(i);
+                LatLng latLng = new LatLng(
+                    Double.parseDouble(marker.get("latitude")),
+                        Double.parseDouble(marker.get("longitude"))
+                );
+                boolean pending = Boolean.parseBoolean(marker.get("is_pending"));
+                addMarker(latLng, pending, false);
+            }
+        }
+    }
+
+    private void addMarker(final LatLng latLng, boolean add, boolean confirm){
+        final MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        if(add){
+            markerOptions.icon(
+                    BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+            );
+        }
+        final Marker marker = mGoogleMap.addMarker(markerOptions);
+        if(add && confirm){
+            addLocation(latLng, marker);
+        }
+    }
+
+    private void addLocation(final LatLng latlng, final Marker marker){
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(latlng.latitude-0.002, latlng.longitude), 16)
+        );
+        AlertDialog.Builder builder = new AlertDialog.Builder(
+                new ContextThemeWrapper(this, R.style.DialogSlideAnim)
+        );
+        AlertDialog dialog = builder
+                .setMessage(
+                        "Anda akan menambahkan lokasi pada latitude: "
+                                + latlng.latitude
+                                + " dan longitude: "
+                                + latlng.longitude
+                                + "\n"
+                )
+                .setPositiveButton("Tambahkan", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        new SaveTask().execute(
+                                getUser().toString()
+                                , String.valueOf(latlng.latitude)
+                                , String.valueOf(latlng.longitude)
+                        );
+                    }
+                })
+                .setNegativeButton("Batal", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        marker.remove();
+                    }
+                })
+                .create();
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        WindowManager.LayoutParams wmlp = dialog.getWindow().getAttributes();
+        wmlp.gravity = Gravity.BOTTOM;
+        wmlp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        dialog.show();
+    }
+
+    private class SaveTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... params) {
+            String user = params[0];
+            String lat = params[1];
+            String lng = params[2];
+            String strUrl = base_api_url+"add_user_locations";
+            URL url;
+
+            StringBuilder sb = new StringBuilder();
+            try{
+                url = new URL(strUrl);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setDoOutput(true);
+                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
+
+                outputStreamWriter.write("google_user_data="+ user.replace("&", "#dan#") + "&latitude=" + lat + "&longitude="+lng);
+                outputStreamWriter.flush();
+                outputStreamWriter.close();
+
+                InputStream iStream = connection.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(iStream));
+
+                String line;
+
+                while((line=reader.readLine()) != null){
+                    sb.append(line);
+                }
+                reader.close();
+                iStream.close();
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+            return sb.toString();
+        }
+
+    }
+
+    private void setupDrawer() {
+        mDrawerToggle = new ActionBarDrawerToggle(
+            this, mDrawerLayout, R.string.app_name, R.string.app_name
+        ){
+            public void onDrawerOpened(View drawerView){
+                super.onDrawerOpened(drawerView);
+                if(getSupportActionBar() != null){
+                    getSupportActionBar().setTitle("Menu");
+                }
+                invalidateOptionsMenu();
+            }
+
+            public void onDrawerClosed(View view){
+                super.onDrawerClosed(view);
+                if(getSupportActionBar() != null){
+                    getSupportActionBar().setTitle(mActivityTitle);
+                }
+                invalidateOptionsMenu();
+            }
+        };
+    }
+
+    private void addDrawerItems() {
+        String[] menus = {"INFO"};
+        mAdapter.set(new ArrayAdapter<>(this, R.layout.drawer_menu_item, menus));
+        mDrawerList.setAdapter(mAdapter.get());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        return
+                id == R.id.action_settings
+                        || mDrawerToggle.onOptionsItemSelected(item)
+                        || super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        LatLng initial = LoadingActivity.getInitialLatLng();
+        googleMap.setMyLocationEnabled(true);
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initial, 16));
     }
 }
