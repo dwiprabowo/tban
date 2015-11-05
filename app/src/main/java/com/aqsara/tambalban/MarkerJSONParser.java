@@ -46,11 +46,35 @@ public class MarkerJSONParser {
         HashMap<String, String> marker = new HashMap<>();
         String lat = "-NA-";
         String lng = "-NA-";
+        String name = "-NA-";
+        String type = "-NA-";
+        String open_time = "-NA-";
+        String close_time = "-NA-";
         String is_pending = "false";
 
         try{
             if(!jMarker.isNull("latitude")){
                 lat = jMarker.getString("latitude");
+            }
+
+            if(!jMarker.isNull("longitude")){
+                lng = jMarker.getString("longitude");
+            }
+
+            if(!jMarker.isNull("name")){
+                name = jMarker.getString("name");
+            }
+
+            if(!jMarker.isNull("type")){
+                type = jMarker.getString("type");
+            }
+
+            if(!jMarker.isNull("open_time")){
+                open_time = jMarker.getString("open_time");
+            }
+
+            if(!jMarker.isNull("close_time")){
+                close_time = jMarker.getString("close_time");
             }
 
             if(!jMarker.isNull("longitude")){
@@ -64,6 +88,10 @@ public class MarkerJSONParser {
             marker.put("latitude", lat);
             marker.put("longitude", lng);
             marker.put("is_pending", is_pending);
+            marker.put("name", name);
+            marker.put("type", type);
+            marker.put("open_time", open_time);
+            marker.put("close_time", close_time);
         }catch (JSONException e){
             e.printStackTrace();
         }

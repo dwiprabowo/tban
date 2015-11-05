@@ -13,24 +13,26 @@
             android:layout_height="match_parent"
             android:id="@+id/map_fragment"
             android:name="com.google.android.gms.maps.SupportMapFragment"
-            />
-        <!--
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:text="Jos Gandos"
-            android:textSize="24sp"
-            android:gravity="center"
-            android:layout_marginTop="100dp"/>
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@android:drawable/sym_def_app_icon"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:contentDescription="Gambar Asal" />
-            -->
+            >
+            <FrameLayout
+                android:id="@+id/fram_map"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" >
+
+                <ImageButton
+                    android:onClick="findClosest"
+                    android:id="@+id/btn_draw_State"
+                    android:layout_width="39dp"
+                    android:layout_height="39dp"
+                    android:layout_gravity="right|top"
+                    android:layout_marginTop="55dp"
+                    android:layout_marginRight="11dp"
+                    android:scaleType="fitCenter"
+                    android:padding="5dp"
+                    android:background="#CCFFFFFF"
+                    android:src="@android:drawable/ic_search_category_default"/>
+            </FrameLayout>
+        </fragment>
     </RelativeLayout>
     <ListView
         android:layout_width="200dp"

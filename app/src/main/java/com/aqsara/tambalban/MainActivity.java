@@ -20,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -40,10 +41,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback{
+public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback {
 
     private ListView mDrawerList;
     private final ThreadLocal<ArrayAdapter<String>> mAdapter = new ThreadLocal<>();
@@ -54,6 +56,10 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback{
 
     GoogleMap mGoogleMap;
     String base_api_url = "http://10.42.0.20/api/web/";
+
+    private LatLng position;
+
+    private LocationsManager locationsManager;
 
     @Override
     protected String title() {
@@ -84,27 +90,27 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback{
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                switch (position){
+                switch (position) {
                     case 0:
-                        if(MainActivity.this.isLoggedIn()){
+                        if (MainActivity.this.isLoggedIn()) {
                             MainActivity.this.logOut();
                         }
                         break;
                     case 1:
-                            startActivity(new Intent(MainActivity.this, HelpActivity.class));
+                        startActivity(new Intent(MainActivity.this, HelpActivity.class));
                         break;
                 }
             }
         });
 
-        if(getSupportActionBar() != null){
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mActivityTitle = getTitle().toString();
-        
+
         setupDrawer();
 
         SupportMapFragment mapFragment = (SupportMapFragment)
@@ -120,35 +126,37 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback{
                 addMarker(latLng, true, true);
             }
         });
+
+        locationsManager = new LocationsManager(mGoogleMap);
     }
 
-    private class RetrieveTask extends AsyncTask<Void, Void, String>{
+    private class RetrieveTask extends AsyncTask<Void, Void, String> {
 
         @Override
         protected String doInBackground(Void... params) {
             String user_id = null;
-            try{
+            try {
                 user_id = StaticData.getUser(MainActivity.this).getString("id");
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             String strUrl = base_api_url + "get_locations/" + user_id;
             URL url;
             StringBuffer sb;
             sb = new StringBuffer();
-            try{
+            try {
                 url = new URL(strUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.connect();
                 InputStream iStream = connection.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(iStream));
                 String line;
-                while ((line=reader.readLine()) != null){
+                while ((line = reader.readLine()) != null) {
                     sb.append(line);
                 }
                 reader.close();
                 iStream.close();
-            } catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             return sb.toString();
@@ -161,15 +169,15 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback{
         }
     }
 
-    private class ParserTask extends AsyncTask<String, Void, List<HashMap<String, String>>>{
+    private class ParserTask extends AsyncTask<String, Void, List<HashMap<String, String>>> {
 
         @Override
         protected List<HashMap<String, String>> doInBackground(String... params) {
             MarkerJSONParser markerParser = new MarkerJSONParser();
             JSONObject json = null;
-            try{
+            try {
                 json = new JSONObject(params[0]);
-            }catch (JSONException e){
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
             return markerParser.parse(json);
@@ -178,35 +186,58 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback{
         @Override
         protected void onPostExecute(List<HashMap<String, String>> hashMaps) {
             super.onPostExecute(hashMaps);
-            for(int i=0;i< hashMaps.size();i++){
+            for (int i = 0; i < hashMaps.size(); i++) {
                 HashMap<String, String> marker = hashMaps.get(i);
                 LatLng latLng = new LatLng(
-                    Double.parseDouble(marker.get("latitude")),
+                        Double.parseDouble(marker.get("latitude")),
                         Double.parseDouble(marker.get("longitude"))
                 );
                 boolean pending = Boolean.parseBoolean(marker.get("is_pending"));
-                addMarker(latLng, pending, false);
+                if(pending){
+                    addMarker(latLng, pending, false);
+                }else{
+                    addMarkerStatic(latLng, marker.get("name"));
+                }
             }
         }
     }
 
-    private void addMarker(final LatLng latLng, boolean add, boolean confirm){
+    public void findClosest(View view){
+        locationsManager.closest();
+    }
+
+    private void addMarkerStatic(final LatLng latLng, String title){
         final MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
-        if(add){
+        if(title != null){
+            markerOptions.title(title);
+        }
+        final Marker marker = mGoogleMap.addMarker(markerOptions);
+        locationsManager.add(latLng, getCurrentLocation(), marker);
+    }
+
+    private void addMarker(final LatLng latLng, boolean add, boolean confirm) {
+        final MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        if (add) {
             markerOptions.icon(
                     BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
             );
         }
+
         final Marker marker = mGoogleMap.addMarker(markerOptions);
-        if(add && confirm){
+        if (add && confirm) {
             addLocation(latLng, marker);
+        }
+
+        if(!add){
+            locationsManager.add(latLng, getCurrentLocation(), marker);
         }
     }
 
-    private void addLocation(final LatLng latlng, final Marker marker){
+    private void addLocation(final LatLng latlng, final Marker marker) {
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                        new LatLng(latlng.latitude-0.002, latlng.longitude), 16)
+                        new LatLng(latlng.latitude - 0.002, latlng.longitude), 16)
         );
         AlertDialog.Builder builder = new AlertDialog.Builder(
                 new ContextThemeWrapper(this, R.style.DialogSlideAnim)
@@ -249,18 +280,18 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback{
             String user = params[0];
             String lat = params[1];
             String lng = params[2];
-            String strUrl = base_api_url+"add_user_locations";
+            String strUrl = base_api_url + "add_user_locations";
             URL url;
 
             StringBuilder sb = new StringBuilder();
-            try{
+            try {
                 url = new URL(strUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("POST");
                 connection.setDoOutput(true);
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
 
-                outputStreamWriter.write("google_user_data="+ user.replace("&", "#dan#") + "&latitude=" + lat + "&longitude="+lng);
+                outputStreamWriter.write("google_user_data=" + user.replace("&", "#dan#") + "&latitude=" + lat + "&longitude=" + lng);
                 outputStreamWriter.flush();
                 outputStreamWriter.close();
 
@@ -269,12 +300,12 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback{
 
                 String line;
 
-                while((line=reader.readLine()) != null){
+                while ((line = reader.readLine()) != null) {
                     sb.append(line);
                 }
                 reader.close();
                 iStream.close();
-            } catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             return sb.toString();
@@ -284,19 +315,19 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback{
 
     private void setupDrawer() {
         mDrawerToggle = new ActionBarDrawerToggle(
-            this, mDrawerLayout, R.string.app_name, R.string.app_name
-        ){
-            public void onDrawerOpened(View drawerView){
+                this, mDrawerLayout, R.string.app_name, R.string.app_name
+        ) {
+            public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                if(getSupportActionBar() != null){
+                if (getSupportActionBar() != null) {
                     getSupportActionBar().setTitle("Menu");
                 }
                 invalidateOptionsMenu();
             }
 
-            public void onDrawerClosed(View view){
+            public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                if(getSupportActionBar() != null){
+                if (getSupportActionBar() != null) {
                     getSupportActionBar().setTitle(mActivityTitle);
                 }
                 invalidateOptionsMenu();
@@ -334,8 +365,12 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback{
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        LatLng initial = LoadingActivity.getInitialLatLng();
+        position = LoadingActivity.getInitialLatLng();
         googleMap.setMyLocationEnabled(true);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initial, 16));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 16));
+    }
+
+    private LatLng getCurrentLocation() {
+        return position;
     }
 }
