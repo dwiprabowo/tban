@@ -22,7 +22,7 @@ public class TBLocation implements Comparable{
     }
 
     public void select(GoogleMap googleMap){
-        marker.showInfoWindow();
+//        marker.showInfoWindow();
 //        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(this.latLng, 16));
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(this.latLng, 16));
     }

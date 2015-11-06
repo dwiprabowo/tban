@@ -26,6 +26,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -196,7 +197,13 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback 
                 if(pending){
                     addMarker(latLng, pending, false);
                 }else{
-                    addMarkerStatic(latLng, marker.get("name"));
+                    addMarkerStatic(
+                            latLng,
+                            marker.get("name"),
+                            marker.get("type"),
+                            marker.get("open_time"),
+                            marker.get("close_time")
+                    );
                 }
             }
         }
@@ -206,12 +213,47 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback 
         locationsManager.closest();
     }
 
-    private void addMarkerStatic(final LatLng latLng, String title){
+    private BitmapDescriptor setMarkerIcon(String type){
+        int icon_res = R.drawable.type_unknown;
+        switch (type){
+            case "motor":
+                icon_res = R.drawable.type_bike;
+                break;
+            case "mobil":
+                icon_res = R.drawable.type_car;
+                break;
+            case "semua":
+                icon_res = R.drawable.type_all;
+                break;
+        }
+        BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(icon_res);
+        return icon;
+    }
+
+    private void addMarkerStatic(
+            final LatLng latLng,
+            String title,
+            String type,
+            String openTime,
+            String closeTime
+    ){
         final MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
         if(title != null){
             markerOptions.title(title);
         }
+        markerOptions.icon(setMarkerIcon(type));
+        String snippetText = "";
+        if(openTime != "-NA-"){
+            snippetText += "buka ~ "+openTime.substring(0, 5);
+        }
+        if(closeTime != "-NA-"){
+            if(openTime != "-NA-"){
+                snippetText += " - ";
+            }
+            snippetText += "tutup ~ "+closeTime.substring(0, 5);
+        }
+        markerOptions.snippet(snippetText);
         final Marker marker = mGoogleMap.addMarker(markerOptions);
         locationsManager.add(latLng, getCurrentLocation(), marker);
     }
