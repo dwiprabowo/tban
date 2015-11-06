@@ -8,10 +8,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -42,7 +43,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -56,7 +56,7 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback 
     private String mActivityTitle;
 
     GoogleMap mGoogleMap;
-    String base_api_url = "http://10.42.0.20/api/web/";
+    String base_api_url = StaticData.base_url_api;
 
     private LatLng position;
 
@@ -121,12 +121,12 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback 
 
         new RetrieveTask().execute();
 
-        mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                addMarker(latLng, true, true);
-            }
-        });
+//        mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+//            @Override
+//            public void onMapClick(LatLng latLng) {
+//                addMarker(latLng, true, true);
+//            }
+//        });
 
         locationsManager = new LocationsManager(mGoogleMap);
     }
@@ -215,6 +215,7 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback 
 
     private BitmapDescriptor setMarkerIcon(String type){
         int icon_res = R.drawable.type_unknown;
+        type = type.toLowerCase();
         switch (type){
             case "motor":
                 icon_res = R.drawable.type_bike;
@@ -222,6 +223,7 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback 
             case "mobil":
                 icon_res = R.drawable.type_car;
                 break;
+            case "mobil/motor":
             case "semua":
                 icon_res = R.drawable.type_all;
                 break;
@@ -378,7 +380,7 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback 
     }
 
     private void addDrawerItems() {
-        String[] menus = {"INFO"};
+        String[] menus = {/*"INFO"*/};
         mAdapter.set(new ArrayAdapter<>(this, R.layout.drawer_menu_item, menus));
         mDrawerList.setAdapter(mAdapter.get());
     }
@@ -387,10 +389,11 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback 
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        return
-                id == R.id.action_settings
-                        || mDrawerToggle.onOptionsItemSelected(item)
-                        || super.onOptionsItemSelected(item);
+        if(id == R.id.action_add_location){
+            startActivity(new Intent(this, AddNewLocation.class));
+            return true;
+        }
+        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -415,4 +418,11 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback 
     private LatLng getCurrentLocation() {
         return position;
     }
+
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_add, menu);
+        return true;
+    }
+
 }

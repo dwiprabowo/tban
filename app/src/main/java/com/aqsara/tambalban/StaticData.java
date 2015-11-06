@@ -10,6 +10,8 @@ import org.json.JSONObject;
 
 public class StaticData {
 
+    public final static String base_url_api = "http://10.42.0.20/api/web/";
+
     public static void saveUser(Context ctx, Person user){
         String userStr = user!=null?user.toString():"";
         SharedPreferences sp = ctx.getSharedPreferences(
