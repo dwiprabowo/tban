@@ -26,13 +26,9 @@ public class LocationsManager {
     }
 
     public void closest(){
-//        for(TBLocation location:locations){
-//            Log.d("ban", "closest before: " + location.getWeight());
-//        }
-        Collections.sort(locations);
-        locations.get(0).select(googleMap);
-//        for(TBLocation location:locations){
-//            Log.d("ban", "closest after: " + location.getWeight());
-//        }
+        if(locations.size() > 0){
+            Collections.sort(locations);
+            locations.get(0).select(googleMap);
+        }
     }
 }
