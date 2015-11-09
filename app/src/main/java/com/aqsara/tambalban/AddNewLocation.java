@@ -146,7 +146,7 @@ public class AddNewLocation extends BaseApp
 
     private void saveData(
             String user, String lat, String lng,
-            String title, String type, String openTime, String closeTime
+            String title, String phone, String type, String openTime, String closeTime
     ){
         class SaveData extends AsyncTask<String, Void, String>{
 
@@ -156,9 +156,10 @@ public class AddNewLocation extends BaseApp
                 String lat = params[1];
                 String lng = params[2];
                 String title = params[3];
-                String type = params[4];
-                String openTime = params[5];
-                String closeTime = params[6];
+                String phone = params[4];
+                String type = params[5];
+                String openTime = params[6];
+                String closeTime = params[7];
 
                 String strUrl = StaticData.base_url_api + "add_user_locations";
                 URL url;
@@ -177,6 +178,7 @@ public class AddNewLocation extends BaseApp
                                     "&latitude=" + lat +
                                     "&longitude=" + lng +
                                     "&title=" + title +
+                                    "&phone=" + phone +
                                     "&type=" + type +
                                     "&open_time=" + openTime +
                                     "&close_time=" + closeTime
@@ -209,7 +211,7 @@ public class AddNewLocation extends BaseApp
         }
 
         SaveData worker = new SaveData();
-        worker.execute(user, lat, lng, title, type, openTime, closeTime);
+        worker.execute(user, lat, lng, title, phone, type, openTime, closeTime);
     }
 
     public void submitData(View view){
@@ -218,6 +220,7 @@ public class AddNewLocation extends BaseApp
                 String.valueOf(position.latitude),
                 String.valueOf(position.longitude),
                 ((EditText) findViewById(R.id.editText)).getText().toString(),
+                ((EditText) findViewById(R.id.editText2)).getText().toString(),
                 ((Spinner) findViewById(R.id.spinner_vehicle_type)).getSelectedItem().toString(),
                 ((Button) findViewById(R.id.open_time)).getText().toString(),
                 ((Button)findViewById(R.id.close_time)).getText().toString()
