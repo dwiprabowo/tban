@@ -1,11 +1,20 @@
 package com.aqsara.tambalban;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
@@ -63,6 +72,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
     String base_api_url = StaticData.base_url_api;
 
     private LatLng position;
+    private Location location;
 
     private LocationsManager locationsManager;
 
@@ -74,7 +84,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
         headerProfileName.setText(getUser().getDisplayName());
     }
 
-    private void signOutDialog(){
+    private void signOutDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder
                 .setMessage("Putuskan sambungan akun google Anda?")
@@ -133,14 +143,32 @@ public class MainActivity extends Base implements OnMapReadyCallback {
 
 //        new RetrieveTask().execute();
 
-//        mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-//            @Override
-//            public void onMapClick(LatLng latLng) {
-//                addMarker(latLng, true, true);
-//            }
-//        });
-
         locationsManager = new LocationsManager(mGoogleMap);
+
+        initLocation();
+    }
+
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private void initLocation(){
+        LocationManager locationManager =
+                (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        if (
+//                canGetLocation()
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        ) {
+            Util.d("permission cek success!!!");
+            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        }
+        Util.d("location test!!: "+location);
+    }
+
+    private boolean canGetLocation(){
+        return (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        );
     }
 
     @Override
@@ -440,13 +468,19 @@ public class MainActivity extends Base implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
 //        position = LoadingActivity.getInitialLatLng(this);
-//        googleMap.setMyLocationEnabled(true);
-//        if(position == null){
-//            Util.d("position not set!");
-//            finish();
-//        }else{
-//            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 16));
-//        }
+        googleMap.setMyLocationEnabled(true);
+        boolean positionSet = false;
+        if(location != null){
+            position = new LatLng(location.getLatitude(), location.getLongitude());
+            if(position != null){
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 16));
+                positionSet = true;
+            }
+        }
+        if(!positionSet){
+            Toast.makeText(this, "Lokasi tidak terdeteksi!", Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
     private LatLng getCurrentLocation() {

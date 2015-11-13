@@ -43,6 +43,7 @@ public class LActivity extends Base implements View.OnClickListener{
                 startActivity(new Intent(this, MainActivity.class));
                 finish();
             }
+            Util.d("result login: "+result.getStatus().toString());
         }
     }
 

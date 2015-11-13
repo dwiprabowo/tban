@@ -122,4 +122,13 @@ public class Base extends AppCompatActivity implements
     }
 
     public void signOutSuccess(){}
+
+    public void delay(Runnable r){
+        delay(r, 2400l);
+    }
+
+    public void delay(Runnable r, Long milis){
+        final Handler handler = new Handler();
+        handler.postDelayed(r, milis);
+    }
 }

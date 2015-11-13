@@ -32,7 +32,7 @@ public class LoadingActivity extends Base{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        animateWheel();
+        animateWheel();
     }
 
     private void animateWheel(){
@@ -55,14 +55,24 @@ public class LoadingActivity extends Base{
 
     @Override
     public void signedInUser() {
-        startActivity(new Intent(this, MainActivity.class));
-        finish();
+        delay(new Runnable() {
+            @Override
+            public void run() {
+                startActivity(new Intent(LoadingActivity.this, MainActivity.class));
+                finish();
+            }
+        });
     }
 
     @Override
     public void notSignedInUser() {
-        startActivity(new Intent(this, LActivity.class));
-        finish();
+        delay(new Runnable() {
+            @Override
+            public void run() {
+                startActivity(new Intent(LoadingActivity.this, LActivity.class));
+                finish();
+            }
+        });
     }
 
 }
