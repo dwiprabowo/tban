@@ -141,7 +141,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
         mapFragment.getMapAsync(this);
         mGoogleMap = mapFragment.getMap();
 
-//        new RetrieveTask().execute();
+        new RetrieveTask().execute();
 
         locationsManager = new LocationsManager(mGoogleMap);
 

@@ -35,7 +35,7 @@ import java.net.URL;
 /**
  * Created by dwi on 006, 11/6/15.
  */
-public class AddNewLocation extends BaseApp
+public class AddNewLocation extends Base
         implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener{
@@ -84,7 +84,6 @@ public class AddNewLocation extends BaseApp
     public void onConnected(Bundle bundle) {
         location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
         position = new LatLng(location.getLatitude(), location.getLongitude());
-//        googleMap.setMyLocationEnabled(true);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 16));
         addMarker();
     }
@@ -216,7 +215,7 @@ public class AddNewLocation extends BaseApp
 
     public void submitData(View view){
         saveData(
-                StaticData.getUser(this).toString(),
+                StaticData.toUserStr(getUser()),
                 String.valueOf(position.latitude),
                 String.valueOf(position.longitude),
                 ((EditText) findViewById(R.id.editText)).getText().toString(),

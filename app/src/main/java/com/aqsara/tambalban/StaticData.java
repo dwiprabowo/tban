@@ -12,10 +12,10 @@ import org.json.JSONObject;
 
 public class StaticData {
 
-    public final static String base_url_api = "http://aqsara.com/api/web/";
+    public final static String base_url_api = "http://192.168.57.1/api/web/";
     public final static String app_tag = "tambalBan";
 
-    private static String toUserStr(GoogleSignInAccount account){
+    public static String toUserStr(GoogleSignInAccount account){
         JSONObject user = new JSONObject();
         if(account != null){
             try {
