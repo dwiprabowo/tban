@@ -5,6 +5,7 @@
         <item>Mobil/Motor</item>
     </string-array>
     <string name="app_name">Lokasi TambalBan</string>
+    <string name="loading">Loading</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="start">Start</string>

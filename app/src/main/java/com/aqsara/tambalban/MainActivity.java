@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -23,6 +24,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -46,7 +50,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 
-public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback {
+public class MainActivity extends Base implements OnMapReadyCallback {
 
     private ListView mDrawerList;
     private final ThreadLocal<ArrayAdapter<String>> mAdapter = new ThreadLocal<>();
@@ -63,8 +67,25 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback 
     private LocationsManager locationsManager;
 
     @Override
-    protected String title() {
-        return getString(R.string.app_name);
+    public void signedInUser() {
+        super.signedInUser();
+
+        TextView headerProfileName = (TextView) findViewById(R.id.header_profile_name);
+        headerProfileName.setText(getUser().getDisplayName());
+    }
+
+    private void signOutDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder
+                .setMessage("Putuskan sambungan akun google Anda?")
+                .setPositiveButton("Ya", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        signOut();
+                    }
+                })
+                .setNegativeButton("Batal", null);
+        builder.show();
     }
 
     @Override
@@ -80,22 +101,13 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback 
         listHeaderView = inflater.inflate(R.layout.header_list, null, false);
         mDrawerList.addHeaderView(listHeaderView);
 
-        try {
-            TextView headerProfileName = (TextView) findViewById(R.id.header_profile_name);
-            headerProfileName.setText(StaticData.getUser(this).getString("displayName"));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 switch (position) {
                     case 0:
-                        if (MainActivity.this.isLoggedIn()) {
-                            MainActivity.this.logOut();
-                        }
+                        signOutDialog();
                         break;
                     case 1:
                         startActivity(new Intent(MainActivity.this, HelpActivity.class));
@@ -119,7 +131,7 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback 
         mapFragment.getMapAsync(this);
         mGoogleMap = mapFragment.getMap();
 
-        new RetrieveTask().execute();
+//        new RetrieveTask().execute();
 
 //        mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
 //            @Override
@@ -130,6 +142,23 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback 
 
         locationsManager = new LocationsManager(mGoogleMap);
     }
+
+    @Override
+    public void signOutSuccess() {
+        startActivity(new Intent(this, LActivity.class));
+        finish();
+    }
+
+    //    private void signOut(){
+//        Auth.GoogleSignInApi.signOut(BaseGoogleLogin.googleClient()).setResultCallback(
+//                new ResultCallback<Status>() {
+//                    @Override
+//                    public void onResult(Status status) {
+//                        Log.d(StaticData.app_tag, status.toString());
+//                    }
+//                }
+//        );
+//    }
 
     private class RetrieveTask extends AsyncTask<Void, Void, String> {
 
@@ -298,7 +327,7 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         new SaveTask().execute(
-                                getUser().toString()
+                                /*getUser().toString() */ ""
                                 , String.valueOf(latlng.latitude)
                                 , String.valueOf(latlng.longitude)
                         );
@@ -410,9 +439,14 @@ public class MainActivity extends BaseGoogleLogin implements OnMapReadyCallback 
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        position = LoadingActivity.getInitialLatLng();
-        googleMap.setMyLocationEnabled(true);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 16));
+//        position = LoadingActivity.getInitialLatLng(this);
+//        googleMap.setMyLocationEnabled(true);
+//        if(position == null){
+//            Util.d("position not set!");
+//            finish();
+//        }else{
+//            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 16));
+//        }
     }
 
     private LatLng getCurrentLocation() {

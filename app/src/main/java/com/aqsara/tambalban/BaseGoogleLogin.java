@@ -1,66 +1,54 @@
 package com.aqsara.tambalban;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
+import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.OptionalPendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 
 public class BaseGoogleLogin extends BaseApp implements
-        GoogleApiClient.ConnectionCallbacks
-        , GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener{
 
-    private static final int RC_SIGN_IN = 0;
+    private static final int RC_SIGN_IN = 9001;
+
     private GoogleApiClient mGoogleApiClient;
+    private ProgressDialog mProgressDialog;
 
-    private boolean mIsResolving = false;
-    private boolean mShouldResolve = false;
+    GoogleSignInOptions gso;
 
-    private Person loggedInUser = null;
-
-    public Person getUser(){
-        return loggedInUser;
-    }
+    private GoogleSignInAccount user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.login_layout);
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Plus.API)
-                .addScope(new Scope(Scopes.PROFILE))
+        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
                 .build();
-    }
-
-    public void logOut(){
-        if(!mGoogleApiClient.isConnected()){
-            return;
-        }
-        new AlertDialog.Builder(this)
-                .setTitle("Keluar Akun")
-                .setMessage("Sambungan dengan akun google Anda akan diputus, Anda yakin?")
-                .setPositiveButton("Ya", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-                        Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
-                        mGoogleApiClient.disconnect();
-//                        imageView.setImageResource(R.drawable.user);
-                        StaticData.deleteUser(BaseGoogleLogin.this);
-                        BaseGoogleLogin.this.finish();
-                    }
-                })
-                .setNegativeButton("Tidak", null)
-                .show();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
     }
 
     @Override
@@ -71,8 +59,62 @@ public class BaseGoogleLogin extends BaseApp implements
     @Override
     protected void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
+        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+        if(opr.isDone()){
+            GoogleSignInResult result = opr.get();
+            handleSignInResult(result);
+        }else{
+            showProgressDialog();
+            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                @Override
+                public void onResult(GoogleSignInResult googleSignInResult) {
+                    hideProgressDialog();
+                    handleSignInResult(googleSignInResult);
+                }
+            });
+        }
     }
+
+    private void signIn(){
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    private void signOut(){
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                    }
+                }
+        );
+    }
+
+    private void showProgressDialog(){
+        if(mProgressDialog == null){
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage(getString(R.string.loading));
+            mProgressDialog.setIndeterminate(true);
+        }
+        mProgressDialog.show();
+    }
+
+    private void hideProgressDialog(){
+        if (mProgressDialog != null && mProgressDialog.isShowing()){
+            mProgressDialog.hide();
+        }
+    }
+
+    private void handleSignInResult(GoogleSignInResult result){
+        if (result.isSuccess()){
+            user = result.getSignInAccount();
+            if(user != null){
+                nextStep();
+            }
+        }
+    }
+
+    public void nextStep(){}
 
     @Override
     protected void onStop() {
@@ -80,107 +122,21 @@ public class BaseGoogleLogin extends BaseApp implements
         mGoogleApiClient.disconnect();
     }
 
-    public boolean isLoggedIn(){
-        return mGoogleApiClient.isConnected();
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        if(Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null){
-            loggedInUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-        }
-    }
-
-//    public String getUserName(){
-//        if(loggedInUser != null){
-//            return loggedInUser.getDisplayName();
-//        }
-//        return null;
-//    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        if(!mIsResolving && mShouldResolve){
-            if(connectionResult.hasResolution()){
-                try{
-                    connectionResult.startResolutionForResult(this, RC_SIGN_IN);
-                    mIsResolving = true;
-                }catch (IntentSender.SendIntentException e){
-                    mIsResolving = false;
-                    mGoogleApiClient.connect();
-                }
-            }
-        }
-    }
-
-//    public void setUserImage(ImageView imageView, String url){
-//        new DownloadImageTask(imageView).execute(url);
-//    }
-
-//    public void setUserImageViewMenu(ImageView imageView){
-//        this.imageView = imageView;
-//    }
-
-//    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-//        ImageView bmImage;
-//
-//        public DownloadImageTask(ImageView bmImage) {
-//            this.bmImage = bmImage;
-//        }
-//
-//        protected Bitmap doInBackground(String... urls) {
-//            String urldisplay = urls[0];
-//            Bitmap mIcon11 = null;
-//            try {
-//                InputStream in = new java.net.URL(urldisplay).openStream();
-//                mIcon11 = BitmapFactory.decodeStream(in);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//            return mIcon11;
-//        }
-//
-//        protected void onPostExecute(Bitmap result) {
-////            bmImage.setImageBitmap(addWhiteBorder(result, 5));
-//        }
-//
-////        private Bitmap addWhiteBorder(Bitmap bmp, int borderSize) {
-////            int color = Color.BLACK;
-////            if(bmp == null){
-////                bmp = BitmapFactory.decodeResource(getResources(), R.drawable.user);
-////                color = Color.TRANSPARENT;
-////            }
-////            Bitmap bmpWithBorder = Bitmap.createBitmap(
-////                    bmp.getWidth() + borderSize * 2
-////                    , bmp.getHeight() + borderSize * 2
-////                    , bmp.getConfig()
-////            );
-////            Canvas canvas = new Canvas(bmpWithBorder);
-////            canvas.drawColor(color);
-////            canvas.drawBitmap(bmp, borderSize, borderSize, null);
-////            return bmpWithBorder;
-////        }
-//    }
-
-    public void login(){
-        mShouldResolve = true;
-        mGoogleApiClient.connect();
+        Log.d(StaticData.app_tag, "onConnectionFailed: "+connectionResult);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN){
-            if(resultCode != RESULT_OK){
-                mShouldResolve = false;
-            }
-            mIsResolving = false;
-            mGoogleApiClient.connect();
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult(result);
         }
+    }
+
+    public GoogleSignInAccount getUser(){
+        return user;
     }
 }
