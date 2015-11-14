@@ -448,6 +448,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
 
         if(id == R.id.action_add_location){
             startActivity(new Intent(this, AddNewLocation.class));
+            finish();
             return true;
         }
         return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);

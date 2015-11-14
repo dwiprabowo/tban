@@ -74,11 +74,11 @@ public class Base extends AppCompatActivity implements
         if (opr.isDone()){
             handleSignInResult(opr.get());
         }else{
-            showProgressDialog();
+//            showProgressDialog();
             opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
                 @Override
                 public void onResult(GoogleSignInResult result) {
-                    hideProgressDialog();
+//                    hideProgressDialog();
                     handleSignInResult(result);
                 }
             });
@@ -100,20 +100,20 @@ public class Base extends AppCompatActivity implements
         }
     }
 
-    private void showProgressDialog(){
-        if(progressDialog == null){
-            progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage("Menunggu Login Akun");
-            progressDialog.setIndeterminate(true);
-        }
-        progressDialog.show();
-    }
-
-    private void hideProgressDialog(){
-        if(progressDialog != null && progressDialog.isShowing()){
-            progressDialog.hide();
-        }
-    }
+//    private void showProgressDialog(){
+//        if(progressDialog == null){
+//            progressDialog = new ProgressDialog(this);
+//            progressDialog.setMessage("Menunggu Login Akun");
+//            progressDialog.setIndeterminate(true);
+//        }
+//        progressDialog.show();
+//    }
+//
+//    private void hideProgressDialog(){
+//        if(progressDialog != null && progressDialog.isShowing()){
+//            progressDialog.hide();
+//        }
+//    }
 
     @Override
     protected void onStop() {

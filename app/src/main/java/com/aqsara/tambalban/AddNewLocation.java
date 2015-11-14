@@ -1,6 +1,7 @@
 package com.aqsara.tambalban;
 
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -205,12 +206,20 @@ public class AddNewLocation extends Base
             @Override
             protected void onPostExecute(String s) {
                 super.onPostExecute(s);
+                startActivity(new Intent(AddNewLocation.this, MainActivity.class));
                 AddNewLocation.this.finish();
             }
         }
 
         SaveData worker = new SaveData();
         worker.execute(user, lat, lng, title, phone, type, openTime, closeTime);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 
     public void submitData(View view){
