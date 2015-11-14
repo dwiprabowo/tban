@@ -28,11 +28,6 @@ public class LActivity extends Base implements View.OnClickListener{
         signInButton.setScopes(getGso().getScopeArray());
     }
 
-    private void signIn(){
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(getGoogleApiClient());
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -42,6 +37,9 @@ public class LActivity extends Base implements View.OnClickListener{
                 GoogleSignInAccount account = result.getSignInAccount();
                 startActivity(new Intent(this, MainActivity.class));
                 finish();
+            }else{
+                signOut();
+                revokeAccessSuccess();
             }
             Util.d("result login: "+result.getStatus().toString());
         }

@@ -69,7 +69,7 @@ public class LoadingActivity extends Base{
         delay(new Runnable() {
             @Override
             public void run() {
-                startActivity(new Intent(LoadingActivity.this, LActivity.class));
+                startActivity(new Intent(LoadingActivity.this, GoogleLoginActivity.class));
                 finish();
             }
         });

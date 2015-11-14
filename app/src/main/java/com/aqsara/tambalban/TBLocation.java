@@ -28,6 +28,7 @@ public class TBLocation implements Comparable{
     }
 
     private void calculate(){
+        if(this.pos == null)return;
         double earthRadius = 3958.75;
         double dLat = Math.toRadians(this.pos.latitude-this.latLng.latitude);
         double dLng = Math.toRadians(this.pos.longitude-this.latLng.longitude);

@@ -194,7 +194,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
         protected String doInBackground(Void... params) {
             String user_id = null;
             try {
-                user_id = StaticData.getUser(MainActivity.this).getString("id");
+                user_id = StaticData.getAccount().getId();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -314,7 +314,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
         }
         markerOptions.snippet(snippetText);
         final Marker marker = mGoogleMap.addMarker(markerOptions);
-        locationsManager.add(latLng, getCurrentLocation(), marker);
+        locationsManager.add(latLng, position, marker);
     }
 
     private void addMarker(final LatLng latLng, boolean add, boolean confirm) {
@@ -332,7 +332,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
         }
 
         if(!add){
-            locationsManager.add(latLng, getCurrentLocation(), marker);
+            locationsManager.add(latLng, position, marker);
         }
     }
 
@@ -481,10 +481,6 @@ public class MainActivity extends Base implements OnMapReadyCallback {
             Toast.makeText(this, "Lokasi tidak terdeteksi!", Toast.LENGTH_SHORT).show();
             finish();
         }
-    }
-
-    private LatLng getCurrentLocation() {
-        return position;
     }
 
     public boolean onCreateOptionsMenu(Menu menu){

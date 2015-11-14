@@ -1,5 +1,7 @@
 package com.aqsara.tambalban;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -25,6 +27,7 @@ public class Base extends AppCompatActivity implements
     private GoogleApiClient googleApiClient;
     private GoogleSignInAccount user;
     private GoogleSignInOptions gso;
+    private ProgressDialog progressDialog;
 
     public GoogleSignInOptions getGso(){
         return gso;
@@ -69,7 +72,24 @@ public class Base extends AppCompatActivity implements
         OptionalPendingResult<GoogleSignInResult> opr =
                 Auth.GoogleSignInApi.silentSignIn(googleApiClient);
         if (opr.isDone()){
-            user = opr.get().getSignInAccount();
+            handleSignInResult(opr.get());
+        }else{
+            showProgressDialog();
+            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                @Override
+                public void onResult(GoogleSignInResult result) {
+                    hideProgressDialog();
+                    handleSignInResult(result);
+                }
+            });
+
+        }
+    }
+
+    private void handleSignInResult(GoogleSignInResult result){
+        if(result.isSuccess()){
+            user = result.getSignInAccount();
+            StaticData.setAccount(user);
             signedInUser();
         }else{
             if(isNetworkConnected()){
@@ -77,6 +97,21 @@ public class Base extends AppCompatActivity implements
             }else{
                 _exit("Tidak terkoneksi dengan Internet");
             }
+        }
+    }
+
+    private void showProgressDialog(){
+        if(progressDialog == null){
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage("Menunggu Login Akun");
+            progressDialog.setIndeterminate(true);
+        }
+        progressDialog.show();
+    }
+
+    private void hideProgressDialog(){
+        if(progressDialog != null && progressDialog.isShowing()){
+            progressDialog.hide();
         }
     }
 
@@ -109,6 +144,11 @@ public class Base extends AppCompatActivity implements
         return ni != null;
     }
 
+    public void signIn(){
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
     public void signOut() {
         Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(
                 new ResultCallback<Status>() {
@@ -120,6 +160,20 @@ public class Base extends AppCompatActivity implements
                     }
                 });
     }
+
+    private void revokeAccess() {
+        Auth.GoogleSignInApi.revokeAccess(googleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                        // [START_EXCLUDE]
+                        revokeAccessSuccess();
+                        // [END_EXCLUDE]
+                    }
+                });
+    }
+
+    protected void revokeAccessSuccess(){}
 
     public void signOutSuccess(){}
 

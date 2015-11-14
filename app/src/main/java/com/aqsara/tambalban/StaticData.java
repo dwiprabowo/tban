@@ -14,6 +14,15 @@ public class StaticData {
 
     public final static String base_url_api = "http://192.168.57.1/api/web/";
     public final static String app_tag = "tambalBan";
+    private static GoogleSignInAccount account;
+
+    public static void setAccount(GoogleSignInAccount account){
+        StaticData.account = account;
+    }
+
+    public static GoogleSignInAccount getAccount(){
+        return account;
+    }
 
     public static String toUserStr(GoogleSignInAccount account){
         JSONObject user = new JSONObject();
