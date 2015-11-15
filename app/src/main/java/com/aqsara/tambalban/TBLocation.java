@@ -10,14 +10,81 @@ import com.google.android.gms.maps.model.Marker;
  */
 public class TBLocation implements Comparable{
 
+    private String title, open_time, close_time;
+    private int id;
     private LatLng latLng, pos;
     private float weight;
     private Marker marker;
 
-    TBLocation(LatLng latLng, LatLng pos, Marker marker){
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getOpen_time() {
+        return open_time;
+    }
+
+    public void setOpen_time(String open_time) {
+        this.open_time = open_time;
+    }
+
+    public String getClose_time() {
+        return close_time;
+    }
+
+    public void setClose_time(String close_time) {
+        this.close_time = close_time;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public LatLng getLatLng() {
+        return latLng;
+    }
+
+    public void setLatLng(LatLng latLng) {
+        this.latLng = latLng;
+    }
+
+    public LatLng getPos() {
+        return pos;
+    }
+
+    public void setPos(LatLng pos) {
+        this.pos = pos;
+    }
+
+    public void setWeight(float weight) {
+        this.weight = weight;
+    }
+
+    public Marker getMarker() {
+        return marker;
+    }
+
+    public void setMarker(Marker marker) {
+        this.marker = marker;
+    }
+
+    TBLocation(LatLng latLng, LatLng pos, Marker marker,
+               String title, String open_time, String close_time, int id){
         this.latLng = latLng;
         this.pos = pos;
         this.marker = marker;
+        this.title = title;
+        this.open_time = open_time;
+        this.close_time = close_time;
+        this.id = id;
         calculate();
     }
 

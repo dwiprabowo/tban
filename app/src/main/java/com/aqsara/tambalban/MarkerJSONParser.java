@@ -51,6 +51,7 @@ public class MarkerJSONParser {
         String open_time = "-NA-";
         String close_time = "-NA-";
         String is_pending = "false";
+        String id = "";
 
         try{
             if(!jMarker.isNull("latitude")){
@@ -85,6 +86,10 @@ public class MarkerJSONParser {
                 is_pending = jMarker.getString("is_pending");
             }
 
+            if(!jMarker.isNull("id")){
+                id = jMarker.getString("id");
+            }
+
             marker.put("latitude", lat);
             marker.put("longitude", lng);
             marker.put("is_pending", is_pending);
@@ -92,6 +97,7 @@ public class MarkerJSONParser {
             marker.put("type", type);
             marker.put("open_time", open_time);
             marker.put("close_time", close_time);
+            marker.put("id", id);
         }catch (JSONException e){
             e.printStackTrace();
         }

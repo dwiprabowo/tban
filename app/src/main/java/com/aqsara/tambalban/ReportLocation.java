@@ -37,7 +37,7 @@ import java.net.URL;
 /**
  * Created by dwi on 006, 11/6/15.
  */
-public class AddNewLocation extends Base
+public class ReportLocation extends Base
         implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener{
@@ -49,13 +49,13 @@ public class AddNewLocation extends Base
 
     @Override
     protected String title() {
-        return "Tambah Lokasi";
+        return "Laporkan Lokasi";
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.add_location);
+        setContentView(R.layout.activity_report_location);
 
         buildGoogleApiClient();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -63,14 +63,6 @@ public class AddNewLocation extends Base
         SupportMapFragment mapFragment = (SupportMapFragment)
                 getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         googleMap = mapFragment.getMap();
-
-        Spinner spinner = (Spinner) findViewById(R.id.spinner_vehicle_type);
-        ArrayAdapter<CharSequence> adapter =
-                ArrayAdapter.createFromResource(
-                        this, R.array.vehicle_types, android.R.layout.simple_spinner_item
-                );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
     }
 
     protected synchronized void buildGoogleApiClient(){
@@ -84,8 +76,7 @@ public class AddNewLocation extends Base
 
     @Override
     public void onConnected(Bundle bundle) {
-        location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        position = new LatLng(location.getLatitude(), location.getLongitude());
+        position = MainActivity.locationSelectedLatLng;
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 16));
         addMarker();
     }
@@ -106,63 +97,18 @@ public class AddNewLocation extends Base
         googleMap.addMarker(markerOptions);
     }
 
-    public void openTime(View view){
-        timePicker(R.id.open_time, "Jam Buka");
-    }
-
-    private void timePicker(int button_id, String title){
-        final Button button = (Button) findViewById(button_id);
-        TimePickerDialog timePickerDialog;
-        timePickerDialog = new TimePickerDialog(
-                this,
-                new TimePickerDialog.OnTimeSetListener(){
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        button.setText(toHumanTime(hourOfDay, minute));
-                    }
-                },
-                0,
-                0,
-                true
-        );
-        timePickerDialog.setTitle(title);
-        timePickerDialog.show();
-    }
-
-    private String toHumanTime(int hour, int minute){
-        String hourStr = String.valueOf(hour);
-        String minuteStr = String.valueOf(minute);
-        if(hourStr.length() < 2){
-            hourStr = "0"+hourStr;
-        }
-        if(minuteStr.length() < 2){
-            minuteStr = "0"+minuteStr;
-        }
-        return hourStr+":"+minuteStr;
-    }
-
-    public void closeTime(View view){
-        timePicker(R.id.close_time, "Jam Tutup");
-    }
-
     private void saveData(
-            String user, String lat, String lng,
-            String title, String phone, String type, String openTime, String closeTime
+            String user, String location, String desc
     ){
         class SaveData extends AsyncTask<String, Void, String>{
 
             @Override
             protected String doInBackground(String... params) {
                 String user = params[0];
-                String lat = params[1];
-                String lng = params[2];
-                String title = params[3];
-                String phone = params[4];
-                String type = params[5];
-                String openTime = params[6];
-                String closeTime = params[7];
+                String location = params[1];
+                String desc = params[2];
 
-                String strUrl = StaticData.base_url_api + "add_user_locations";
+                String strUrl = StaticData.base_url_api + "add_location_report";
                 URL url;
 
                 StringBuilder sb = new StringBuilder();
@@ -176,13 +122,8 @@ public class AddNewLocation extends Base
 
                     outputStreamWriter.write(
                             "google_user_data=" + user.replace("&", "#dan#") +
-                                    "&latitude=" + lat +
-                                    "&longitude=" + lng +
-                                    "&title=" + title +
-                                    "&phone=" + phone +
-                                    "&type=" + type +
-                                    "&open_time=" + openTime +
-                                    "&close_time=" + closeTime
+                                    "&location_id=" + location +
+                                    "&desc=" + desc
                     );
                     outputStreamWriter.flush();
                     outputStreamWriter.close();
@@ -207,13 +148,18 @@ public class AddNewLocation extends Base
             @Override
             protected void onPostExecute(String s) {
                 super.onPostExecute(s);
-                startActivity(new Intent(AddNewLocation.this, MainActivity.class));
-                AddNewLocation.this.finish();
+                startActivity(new Intent(ReportLocation.this, MainActivity.class));
+                Toast.makeText(
+                        ReportLocation.this, "Terima Kasih atas Laporan Anda", Toast.LENGTH_SHORT
+                ).show();
+                MainActivity.locationSelected = 0;
+                MainActivity.locationSelectedLatLng = null;
+                ReportLocation.this.finish();
             }
         }
 
         SaveData worker = new SaveData();
-        worker.execute(user, lat, lng, title, phone, type, openTime, closeTime);
+        worker.execute(user, location, desc);
     }
 
     @Override
@@ -226,13 +172,8 @@ public class AddNewLocation extends Base
     public void submitData(View view){
         saveData(
                 StaticData.toUserStr(getUser()),
-                String.valueOf(position.latitude),
-                String.valueOf(position.longitude),
-                ((EditText) findViewById(R.id.editText)).getText().toString(),
-                ((EditText) findViewById(R.id.editText2)).getText().toString(),
-                ((Spinner) findViewById(R.id.spinner_vehicle_type)).getSelectedItem().toString(),
-                ((Button) findViewById(R.id.open_time)).getText().toString(),
-                ((Button)findViewById(R.id.close_time)).getText().toString()
+                String.valueOf(MainActivity.locationSelected),
+                String.valueOf(((EditText) findViewById(R.id.desc_text)).getText())
         );
         view.setVisibility(View.GONE);
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);

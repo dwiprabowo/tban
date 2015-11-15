@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,6 +30,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,6 +60,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -75,6 +80,8 @@ public class MainActivity extends Base implements OnMapReadyCallback {
     private Location location;
 
     private LocationsManager locationsManager;
+    public static int locationSelected;
+    public static LatLng locationSelectedLatLng;
 
     @Override
     public void signedInUser() {
@@ -96,6 +103,46 @@ public class MainActivity extends Base implements OnMapReadyCallback {
                 })
                 .setNegativeButton("Batal", null);
         builder.show();
+    }
+
+    private class MarkerInfoWindow implements GoogleMap.InfoWindowAdapter{
+
+        @Override
+        public View getInfoWindow(Marker marker) {
+            return null;
+        }
+
+        @Override
+        public View getInfoContents(Marker marker) {
+            View v = getLayoutInflater().inflate(R.layout.info_window_layout, null);
+            TBLocation location = locationsManager.getLocation(marker);
+            Util.d("marker location set: "+location);
+            locationSelected = location.getId();
+            locationSelectedLatLng = location.getLatLng();
+
+            if(location == null){
+                Toast.makeText(MainActivity.this, "location null!", Toast.LENGTH_SHORT).show();
+                System.exit(0);
+            }
+            TextView _title = (TextView)v.findViewById(R.id.title);
+            TextView _openTime = (TextView)v.findViewById(R.id.open_time);
+            TextView _closeTime = (TextView)v.findViewById(R.id.close_time);
+//            Button _reportButton = (Button)v.findViewById(R.id.report_button);
+            _title.setText(location.getTitle());
+            if(location.getOpen_time() != null){
+                _openTime.setText("Buka  : "+location.getOpen_time());
+            }
+            if(location.getClose_time() != null){
+                _closeTime.setText("Tutup : "+location.getClose_time());
+            }
+//            _reportButton.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    startActivity(new Intent(MainActivity.this, ReportLocation.class));
+//                }
+//            });
+            return v;
+        }
     }
 
     @Override
@@ -146,6 +193,15 @@ public class MainActivity extends Base implements OnMapReadyCallback {
         locationsManager = new LocationsManager(mGoogleMap);
 
         initLocation();
+    }
+
+    public void reportLocation(View v){
+        Util.d("reportLocation !!!");
+        if(locationSelected != 0){
+            startActivity(new Intent(MainActivity.this, ReportLocation.class));
+        }else{
+            Toast.makeText(this, "Lokasi pelaporan belum dipilih!", Toast.LENGTH_SHORT).show();
+        }
     }
 
 
@@ -259,7 +315,8 @@ public class MainActivity extends Base implements OnMapReadyCallback {
                             marker.get("name"),
                             marker.get("type"),
                             marker.get("open_time"),
-                            marker.get("close_time")
+                            marker.get("close_time"),
+                            Integer.parseInt(marker.get("id"))
                     );
                 }
             }
@@ -267,6 +324,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
     }
 
     public void findClosest(View view){
+        Util.d("findClosest!!!");
         locationsManager.closest();
     }
 
@@ -294,27 +352,24 @@ public class MainActivity extends Base implements OnMapReadyCallback {
             String title,
             String type,
             String openTime,
-            String closeTime
+            String closeTime,
+            int locationID
     ){
         final MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
-        if(title != null){
-            markerOptions.title(title);
-        }
         markerOptions.icon(setMarkerIcon(type));
-        String snippetText = "";
         if(openTime != "-NA-"){
-            snippetText += "buka ~ "+openTime.substring(0, 5);
+            openTime = openTime.substring(0, 5);
         }
         if(closeTime != "-NA-"){
-            if(openTime != "-NA-"){
-                snippetText += " - ";
-            }
-            snippetText += "tutup ~ "+closeTime.substring(0, 5);
+            closeTime = closeTime.substring(0, 5);
         }
-        markerOptions.snippet(snippetText);
         final Marker marker = mGoogleMap.addMarker(markerOptions);
-        locationsManager.add(latLng, position, marker);
+        mGoogleMap.setInfoWindowAdapter(new MarkerInfoWindow());
+        locationsManager.add(
+                new TBLocation(latLng, position, marker, title, openTime, closeTime, locationID)
+                , marker
+        );
     }
 
     private void addMarker(final LatLng latLng, boolean add, boolean confirm) {
@@ -330,10 +385,10 @@ public class MainActivity extends Base implements OnMapReadyCallback {
         if (add && confirm) {
             addLocation(latLng, marker);
         }
-
-        if(!add){
-            locationsManager.add(latLng, position, marker);
-        }
+//
+//        if(!add){
+//            locationsManager.add(latLng, position, marker);
+//        }
     }
 
     private void addLocation(final LatLng latlng, final Marker marker) {
