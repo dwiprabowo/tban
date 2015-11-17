@@ -130,10 +130,10 @@ public class MainActivity extends Base implements OnMapReadyCallback {
 //            Button _reportButton = (Button)v.findViewById(R.id.report_button);
             _title.setText(location.getTitle());
             if(location.getOpen_time() != null){
-                _openTime.setText("Buka  : "+location.getOpen_time());
+                _openTime.setText("Buka  ~ "+location.getOpen_time());
             }
             if(location.getClose_time() != null){
-                _closeTime.setText("Tutup : "+location.getClose_time());
+                _closeTime.setText("Tutup ~ "+location.getClose_time());
             }
 //            _reportButton.setOnClickListener(new View.OnClickListener() {
 //                @Override
@@ -167,7 +167,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
                         signOutDialog();
                         break;
                     case 1:
-                        startActivity(new Intent(MainActivity.this, HelpActivity.class));
+                        startActivity(new Intent(MainActivity.this, InfoActivity.class));
                         break;
                 }
             }
@@ -492,7 +492,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
     }
 
     private void addDrawerItems() {
-        String[] menus = {/*"INFO"*/};
+        String[] menus = {"Info"};
         mAdapter.set(new ArrayAdapter<>(this, R.layout.drawer_menu_item, menus));
         mDrawerList.setAdapter(mAdapter.get());
     }
