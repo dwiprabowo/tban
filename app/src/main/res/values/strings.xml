@@ -15,4 +15,6 @@
     <string name="title_activity_help">HelpActivity</string>
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="title_activity_root_help">Bantuan</string>
+    <string name="prefix_buka">Buka ~ %1$s</string>
+    <string name="prefix_tutup">Tutup ~ %1$s</string>
 </resources>

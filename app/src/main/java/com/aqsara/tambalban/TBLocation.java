@@ -1,20 +1,17 @@
 package com.aqsara.tambalban;
 
+import android.support.annotation.NonNull;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 
-/**
- * Created by dwi on 005, 11/5/15.
- */
 public class TBLocation implements Comparable{
 
     private String title, open_time, close_time;
     private int id;
     private LatLng latLng, pos;
     private float weight;
-    private Marker marker;
 
     public String getTitle() {
         return title;
@@ -28,16 +25,8 @@ public class TBLocation implements Comparable{
         return open_time;
     }
 
-    public void setOpen_time(String open_time) {
-        this.open_time = open_time;
-    }
-
     public String getClose_time() {
         return close_time;
-    }
-
-    public void setClose_time(String close_time) {
-        this.close_time = close_time;
     }
 
     public int getId() {
@@ -52,35 +41,10 @@ public class TBLocation implements Comparable{
         return latLng;
     }
 
-    public void setLatLng(LatLng latLng) {
-        this.latLng = latLng;
-    }
-
-    public LatLng getPos() {
-        return pos;
-    }
-
-    public void setPos(LatLng pos) {
-        this.pos = pos;
-    }
-
-    public void setWeight(float weight) {
-        this.weight = weight;
-    }
-
-    public Marker getMarker() {
-        return marker;
-    }
-
-    public void setMarker(Marker marker) {
-        this.marker = marker;
-    }
-
-    TBLocation(LatLng latLng, LatLng pos, Marker marker,
+    TBLocation(LatLng latLng, LatLng pos,
                String title, String open_time, String close_time, int id){
         this.latLng = latLng;
         this.pos = pos;
-        this.marker = marker;
         this.title = title;
         this.open_time = open_time;
         this.close_time = close_time;
@@ -89,8 +53,6 @@ public class TBLocation implements Comparable{
     }
 
     public void select(GoogleMap googleMap){
-//        marker.showInfoWindow();
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(this.latLng, 16));
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(this.latLng, 16));
     }
 
@@ -107,15 +69,11 @@ public class TBLocation implements Comparable{
 
         int meterConversion = 1609;
 
-        this.weight = new Float(dist * meterConversion).floatValue();
-    }
-
-    public float getWeight(){
-        return this.weight;
+        this.weight = (float) (dist * meterConversion);
     }
 
     @Override
-    public int compareTo(Object another) {
+    public int compareTo(@NonNull Object another) {
         TBLocation o = (TBLocation) another;
         if(weight > o.weight){
             return 1;

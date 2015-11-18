@@ -1,6 +1,5 @@
 package com.aqsara.tambalban;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -27,18 +26,9 @@ public class Base extends AppCompatActivity implements
     private GoogleApiClient googleApiClient;
     private GoogleSignInAccount user;
     private GoogleSignInOptions gso;
-    private ProgressDialog progressDialog;
 
     public GoogleSignInOptions getGso(){
         return gso;
-    }
-
-    public GoogleApiClient getGoogleApiClient(){
-        return googleApiClient;
-    }
-
-    public void setUser(GoogleSignInAccount user){
-        this.user = user;
     }
 
     protected String title(){

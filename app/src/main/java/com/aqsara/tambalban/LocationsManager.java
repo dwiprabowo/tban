@@ -1,9 +1,6 @@
 package com.aqsara.tambalban;
 
-import android.util.Log;
-
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 import java.util.ArrayList;
@@ -26,8 +23,7 @@ public class LocationsManager {
     }
 
     public TBLocation getLocation(Marker marker){
-        TBLocation location = locationsMapping.get(marker);
-        return  location;
+        return locationsMapping.get(marker);
     }
 
     public void closest(){

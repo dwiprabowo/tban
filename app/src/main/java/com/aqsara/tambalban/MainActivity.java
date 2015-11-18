@@ -10,36 +10,22 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationManager;
-import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.util.Log;
-import android.view.ContextThemeWrapper;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -49,18 +35,14 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -99,6 +81,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         signOut();
+                        MainActivity.this.finish();
                     }
                 })
                 .setNegativeButton("Batal", null);
@@ -120,27 +103,14 @@ public class MainActivity extends Base implements OnMapReadyCallback {
             locationSelected = location.getId();
             locationSelectedLatLng = location.getLatLng();
 
-            if(location == null){
-                Toast.makeText(MainActivity.this, "location null!", Toast.LENGTH_SHORT).show();
-                System.exit(0);
-            }
             TextView _title = (TextView)v.findViewById(R.id.title);
             TextView _openTime = (TextView)v.findViewById(R.id.open_time);
             TextView _closeTime = (TextView)v.findViewById(R.id.close_time);
-//            Button _reportButton = (Button)v.findViewById(R.id.report_button);
             _title.setText(location.getTitle());
-            if(location.getOpen_time() != null){
-                _openTime.setText("Buka  ~ "+location.getOpen_time());
-            }
-            if(location.getClose_time() != null){
-                _closeTime.setText("Tutup ~ "+location.getClose_time());
-            }
-//            _reportButton.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    startActivity(new Intent(MainActivity.this, ReportLocation.class));
-//                }
-//            });
+            if(location.getOpen_time() != null)
+                _openTime.setText(getString(R.string.prefix_buka, location.getOpen_time()));
+            if(location.getClose_time() != null)
+                _closeTime.setText(getString(R.string.prefix_tutup, location.getClose_time()));
             return v;
         }
     }
@@ -214,38 +184,18 @@ public class MainActivity extends Base implements OnMapReadyCallback {
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
         ) {
-            Util.d("permission cek success!!!");
             location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if(location == null){
                 location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             }
         }
-        Util.d("location test!!: "+location);
-    }
-
-    private boolean canGetLocation(){
-        return (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        );
     }
 
     @Override
     public void signOutSuccess() {
-        startActivity(new Intent(this, LActivity.class));
+        startActivity(new Intent(this, GoogleLoginActivity.class));
         finish();
     }
-
-    //    private void signOut(){
-//        Auth.GoogleSignInApi.signOut(BaseGoogleLogin.googleClient()).setResultCallback(
-//                new ResultCallback<Status>() {
-//                    @Override
-//                    public void onResult(Status status) {
-//                        Log.d(StaticData.app_tag, status.toString());
-//                    }
-//                }
-//        );
-//    }
 
     private class RetrieveTask extends AsyncTask<Void, Void, String> {
 
@@ -311,7 +261,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
                 );
                 boolean pending = Boolean.parseBoolean(marker.get("is_pending"));
                 if(pending){
-                    addMarker(latLng, pending, false);
+                    addMarker(latLng, true);
                 }else{
                     addMarkerStatic(
                             latLng,
@@ -346,8 +296,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
                 icon_res = R.drawable.type_all;
                 break;
         }
-        BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(icon_res);
-        return icon;
+        return BitmapDescriptorFactory.fromResource(icon_res);
     }
 
     private void addMarkerStatic(
@@ -361,21 +310,21 @@ public class MainActivity extends Base implements OnMapReadyCallback {
         final MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
         markerOptions.icon(setMarkerIcon(type));
-        if(openTime != "-NA-"){
+        if(!openTime.equals("-NA-")){
             openTime = openTime.substring(0, 5);
         }
-        if(closeTime != "-NA-"){
+        if(!closeTime.equals( "-NA-")){
             closeTime = closeTime.substring(0, 5);
         }
         final Marker marker = mGoogleMap.addMarker(markerOptions);
         mGoogleMap.setInfoWindowAdapter(new MarkerInfoWindow());
         locationsManager.add(
-                new TBLocation(latLng, position, marker, title, openTime, closeTime, locationID)
+                new TBLocation(latLng, position, title, openTime, closeTime, locationID)
                 , marker
         );
     }
 
-    private void addMarker(final LatLng latLng, boolean add, boolean confirm) {
+    private void addMarker(final LatLng latLng, boolean add) {
         final MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
         if (add) {
@@ -383,93 +332,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
                     BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
             );
         }
-
-        final Marker marker = mGoogleMap.addMarker(markerOptions);
-        if (add && confirm) {
-            addLocation(latLng, marker);
-        }
-//
-//        if(!add){
-//            locationsManager.add(latLng, position, marker);
-//        }
-    }
-
-    private void addLocation(final LatLng latlng, final Marker marker) {
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                        new LatLng(latlng.latitude - 0.002, latlng.longitude), 16)
-        );
-        AlertDialog.Builder builder = new AlertDialog.Builder(
-                new ContextThemeWrapper(this, R.style.DialogSlideAnim)
-        );
-        AlertDialog dialog = builder
-                .setMessage(
-                        "Anda akan menambahkan lokasi pada latitude: "
-                                + latlng.latitude
-                                + " dan longitude: "
-                                + latlng.longitude
-                                + "\n"
-                )
-                .setPositiveButton("Tambahkan", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        new SaveTask().execute(
-                                /*getUser().toString() */ ""
-                                , String.valueOf(latlng.latitude)
-                                , String.valueOf(latlng.longitude)
-                        );
-                    }
-                })
-                .setNegativeButton("Batal", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        marker.remove();
-                    }
-                })
-                .create();
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        WindowManager.LayoutParams wmlp = dialog.getWindow().getAttributes();
-        wmlp.gravity = Gravity.BOTTOM;
-        wmlp.width = WindowManager.LayoutParams.MATCH_PARENT;
-        dialog.show();
-    }
-
-    private class SaveTask extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... params) {
-            String user = params[0];
-            String lat = params[1];
-            String lng = params[2];
-            String strUrl = base_api_url + "add_user_locations";
-            URL url;
-
-            StringBuilder sb = new StringBuilder();
-            try {
-                url = new URL(strUrl);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("POST");
-                connection.setDoOutput(true);
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
-
-                outputStreamWriter.write("google_user_data=" + user.replace("&", "#dan#") + "&latitude=" + lat + "&longitude=" + lng);
-                outputStreamWriter.flush();
-                outputStreamWriter.close();
-
-                InputStream iStream = connection.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(iStream));
-
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                reader.close();
-                iStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return sb.toString();
-        }
-
+        mGoogleMap.addMarker(markerOptions);
     }
 
     private void setupDrawer() {
@@ -526,15 +389,12 @@ public class MainActivity extends Base implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-//        position = LoadingActivity.getInitialLatLng(this);
         googleMap.setMyLocationEnabled(true);
         boolean positionSet = false;
         if(location != null){
             position = new LatLng(location.getLatitude(), location.getLongitude());
-            if(position != null){
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 16));
-                positionSet = true;
-            }
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 16));
+            positionSet = true;
         }
         if(!positionSet){
             Toast.makeText(this, "Lokasi tidak terdeteksi!", Toast.LENGTH_SHORT).show();
