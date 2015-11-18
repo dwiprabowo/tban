@@ -216,6 +216,9 @@ public class MainActivity extends Base implements OnMapReadyCallback {
         ) {
             Util.d("permission cek success!!!");
             location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if(location == null){
+                location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            }
         }
         Util.d("location test!!: "+location);
     }
