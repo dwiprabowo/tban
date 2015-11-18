@@ -93,5 +93,50 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+        <activity
+            android:name=".InfoItem1Activity"
+            android:label="Tambah Lokasi"
+            android:parentActivityName=".InfoActivity"
+            android:theme="@style/AppTheme" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".InfoActivity" />
+        </activity>
+        <activity
+            android:name=".InfoItem2Activity"
+            android:label="Lokasi Terdekat"
+            android:parentActivityName=".InfoActivity"
+            android:theme="@style/AppTheme" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".InfoActivity" />
+        </activity>
+        <activity
+            android:name=".InfoItem3Activity"
+            android:label="Lokasi TambalBan"
+            android:parentActivityName=".InfoActivity"
+            android:theme="@style/AppTheme" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".InfoActivity" />
+        </activity>
+        <activity
+            android:name=".InfoItem4Activity"
+            android:label="Tambah Lokasi"
+            android:parentActivityName=".InfoActivity"
+            android:theme="@style/AppTheme" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".InfoActivity" />
+        </activity>
+        <activity
+            android:name=".InfoItem5Activity"
+            android:label="Laporkan Lokasi"
+            android:parentActivityName=".InfoActivity"
+            android:theme="@style/AppTheme" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".InfoActivity" />
+        </activity>
     </application>
 </manifest>

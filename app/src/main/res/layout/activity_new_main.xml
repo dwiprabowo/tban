@@ -43,7 +43,7 @@
                     android:scaleType="fitCenter"
                     android:padding="5dp"
                     android:background="#CCFFFFFF"
-                    android:src="@android:drawable/ic_menu_edit"/>
+                    android:src="@android:drawable/ic_delete"/>
             </FrameLayout>
         </fragment>
     </RelativeLayout>

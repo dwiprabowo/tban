@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollView" >
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="32dp">
+
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="48dp"
+                android:id="@+id/imageView10"
+                android:src="@android:drawable/ic_search_category_default" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pada layar utama terdapat beberapa tombol dan salah satunya bersimbol seperti gambar disamping kiri, fungsi tombol tersebut adalah untuk mencari lokasi terdekat dari titik lokasi Anda, dan langsung mengarahkan kamera peta ke lokasi tersebut."
+                android:id="@+id/textView8" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

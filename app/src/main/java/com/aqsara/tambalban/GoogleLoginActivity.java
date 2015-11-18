@@ -23,7 +23,7 @@ import com.google.android.gms.common.api.Status;
  * Activity to demonstrate basic retrieval of the Google user's ID, email address, and basic
  * profile.
  */
-public class GoogleLoginActivity extends AppCompatActivity implements
+public class GoogleLoginActivity extends BaseApp implements
         GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener {
 
@@ -54,6 +54,11 @@ public class GoogleLoginActivity extends AppCompatActivity implements
         SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         signInButton.setScopes(gso.getScopeArray());
+    }
+
+    @Override
+    protected String title() {
+        return "Login Akun Google";
     }
 
     @Override
@@ -147,7 +152,7 @@ public class GoogleLoginActivity extends AppCompatActivity implements
     private void showProgressDialog() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage(getString(R.string.loading));
+            mProgressDialog.setMessage("Menghubungkan");
             mProgressDialog.setIndeterminate(true);
         }
 

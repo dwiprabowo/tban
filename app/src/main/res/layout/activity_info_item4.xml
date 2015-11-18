@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollView3" >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="32dp">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:layout_width="60dp"
+                    android:layout_height="48dp"
+                    android:id="@+id/imageView14"
+                    android:src="@android:drawable/ic_input_add" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Setiap pengguna dapat menambahkan lokasi TambalBan baru dengan cara meng-klik tombol bersimbol seperti gambar disamping. Letak tombol tersebut berada pada layar utama sebelah kanan atas, ketika di klik akan mengarahkan Anda ke layar untuk memasukan info seputar tambal ban, lengkapi info tersebut."
+                    android:id="@+id/textView15" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Setelah input lokasi, lokasi tersebut tidak langsung tersedia, Anda harus menunggu hingga Admin kami untuk mereview lokasi tersebut. Lokasi yang diterima dan disetujui oleh admin akan tersedia untuk setiap pengguna yang mengakses aplikasi. Lokasi penambahan adalah lokasi Anda saat itu, sehingga Anda harus menuju lokasi tersebut menggunakan device Anda, mendapatkan koordinat lokasi dan menambahkannya."
+                android:id="@+id/textView16"
+                android:layout_marginTop="32dp" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

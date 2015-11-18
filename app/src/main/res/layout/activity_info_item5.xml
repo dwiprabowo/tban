@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollView4" >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="32dp">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:layout_width="60dp"
+                    android:layout_height="48dp"
+                    android:id="@+id/imageView15"
+                    android:src="@android:drawable/ic_delete" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pelaporan lokasi dapat dilakukan ketika Anda tidak menemukan lokasi atau lokasi yang dituju tidak terdapat tambalBan, sehingga pengguna lain tidak akan menuju lokasi yang tidak ada untuk kedua kalinya. Setiap pengguna diharapkan untuk melaporkan sesuatu seperti ini dengan cara memilih lokasi yang ingin dilaporkan lalu menekan tombol seperti gambar disamping kiri pada layar utama."
+                    android:id="@+id/textView17" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
