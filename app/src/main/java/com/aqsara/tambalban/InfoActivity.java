@@ -6,12 +6,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-/**
- * Created by dwi on 17/11/15.
- */
 public class InfoActivity extends Base {
-
-    private ListView listView;
 
     @Override
     protected String title() {
@@ -32,9 +27,9 @@ public class InfoActivity extends Base {
         };
 
         InfoAdapter adapter = new InfoAdapter(this, R.layout.info_listview_header_row, infoItems);
-        listView = (ListView)findViewById(R.id.info_list_view);
+        ListView listView = (ListView) findViewById(R.id.info_list_view);
 
-        View header = (View)getLayoutInflater().inflate(R.layout.info_listview_header_row, null);
+        View header = getLayoutInflater().inflate(R.layout.info_listview_header_row, null);
         listView.addHeaderView(header);
 
         listView.setAdapter(adapter);

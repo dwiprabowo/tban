@@ -9,11 +9,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
-/**
- * Created by dwi on 17/11/15.
- */
 public class InfoAdapter extends ArrayAdapter<InfoItem> {
 
     Context context;
@@ -30,7 +25,7 @@ public class InfoAdapter extends ArrayAdapter<InfoItem> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
-        InfoHolder holder = null;
+        InfoHolder holder;
 
         if(row == null){
             LayoutInflater inflater = ((Activity)context).getLayoutInflater();

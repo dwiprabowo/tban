@@ -1,8 +1,5 @@
 package com.aqsara.tambalban;
 
-/**
- * Created by dwi on 17/11/15.
- */
 public class InfoItem {
 
     private int icon;

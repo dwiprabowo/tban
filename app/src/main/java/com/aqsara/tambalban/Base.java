@@ -1,6 +1,5 @@
 package com.aqsara.tambalban;
 
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -22,14 +21,9 @@ import com.google.android.gms.common.api.Status;
 public class Base extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener{
 
-    public static final int RC_SIGN_IN = 9001;
     private GoogleApiClient googleApiClient;
     private GoogleSignInAccount user;
-    private GoogleSignInOptions gso;
-
-    public GoogleSignInOptions getGso(){
-        return gso;
-    }
+    protected GoogleSignInOptions gso;
 
     protected String title(){
         return null;
@@ -134,11 +128,6 @@ public class Base extends AppCompatActivity implements
         return ni != null;
     }
 
-    public void signIn(){
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
     public void signOut() {
         Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(
                 new ResultCallback<Status>() {
@@ -150,20 +139,6 @@ public class Base extends AppCompatActivity implements
                     }
                 });
     }
-
-    private void revokeAccess() {
-        Auth.GoogleSignInApi.revokeAccess(googleApiClient).setResultCallback(
-                new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(Status status) {
-                        // [START_EXCLUDE]
-                        revokeAccessSuccess();
-                        // [END_EXCLUDE]
-                    }
-                });
-    }
-
-    protected void revokeAccessSuccess(){}
 
     public void signOutSuccess(){}
 
