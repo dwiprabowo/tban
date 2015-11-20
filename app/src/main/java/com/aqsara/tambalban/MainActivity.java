@@ -99,7 +99,6 @@ public class MainActivity extends Base implements OnMapReadyCallback {
         public View getInfoContents(Marker marker) {
             View v = getLayoutInflater().inflate(R.layout.info_window_layout, null);
             TBLocation location = locationsManager.getLocation(marker);
-            Util.d("marker location set: "+location);
             locationSelected = location.getId();
             locationSelectedLatLng = location.getLatLng();
 
@@ -166,9 +165,9 @@ public class MainActivity extends Base implements OnMapReadyCallback {
     }
 
     public void reportLocation(View v){
-        Util.d("reportLocation !!!");
         if(locationSelected != 0){
             startActivity(new Intent(MainActivity.this, ReportLocation.class));
+            finish();
         }else{
             Toast.makeText(this, "Lokasi pelaporan belum dipilih!", Toast.LENGTH_SHORT).show();
         }
