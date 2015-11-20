@@ -3,7 +3,6 @@ package com.aqsara.tambalban;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.auth.api.Auth;
@@ -21,7 +20,6 @@ public class GoogleLoginActivity extends BaseApp implements
         GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener {
 
-    private static final String TAG = "SignInActivity";
     private static final int RC_SIGN_IN = 9001;
 
     private GoogleApiClient mGoogleApiClient;
@@ -38,7 +36,7 @@ public class GoogleLoginActivity extends BaseApp implements
                 .requestEmail()
                 .build();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .enableAutoManage(this, this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
@@ -58,7 +56,6 @@ public class GoogleLoginActivity extends BaseApp implements
 
         OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
         if (opr.isDone()) {
-            Log.d(TAG, "Got cached sign-in");
             GoogleSignInResult result = opr.get();
             handleSignInResult(result);
         } else {
@@ -79,66 +76,48 @@ public class GoogleLoginActivity extends BaseApp implements
 
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            Util.d("result login: "+result.getStatus().toString());
             handleSignInResult(result);
         }
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
-        Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             GoogleSignInAccount acct = result.getSignInAccount();
             StaticData.setAccount(acct);
             updateUI(true);
         } else {
-            // Signed out, show unauthenticated UI.
             updateUI(false);
         }
-        Util.d("result signin: "+result.getStatus().toString());
     }
-    // [END handleSignInResult]
 
-    // [START signIn]
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
-    // [END signIn]
 
-    // [START signOut]
     private void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
                 new ResultCallback<Status>() {
                     @Override
                     public void onResult(Status status) {
-                        // [START_EXCLUDE]
                         updateUI(false);
-                        // [END_EXCLUDE]
                     }
                 });
     }
-    // [END signOut]
 
-    // [START revokeAccess]
     private void revokeAccess() {
         Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
                 new ResultCallback<Status>() {
                     @Override
                     public void onResult(Status status) {
-                        // [START_EXCLUDE]
                         updateUI(false);
-                        // [END_EXCLUDE]
                     }
                 });
     }
     // [END revokeAccess]
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        // An unresolvable error has occurred and Google APIs (including Sign-In) will not
-        // be available.
-        Log.d(TAG, "onConnectionFailed:" + connectionResult);
-    }
+    public void onConnectionFailed(ConnectionResult connectionResult) {}
 
     private void showProgressDialog() {
         if (mProgressDialog == null) {
@@ -146,7 +125,6 @@ public class GoogleLoginActivity extends BaseApp implements
             mProgressDialog.setMessage("Menghubungkan");
             mProgressDialog.setIndeterminate(true);
         }
-
         mProgressDialog.show();
     }
 
