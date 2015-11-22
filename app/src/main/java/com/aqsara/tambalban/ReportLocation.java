@@ -137,6 +137,9 @@ public class ReportLocation extends Base
 
             @Override
             protected void onPostExecute(String s) {
+                if(s == null || s.equals("")){
+                    _exit("Terjadi kesalahan pada Server, Coba beberapa saat lagi", ReportLocation.this);
+                }
                 super.onPostExecute(s);
                 startActivity(new Intent(ReportLocation.this, MainActivity.class));
                 Toast.makeText(

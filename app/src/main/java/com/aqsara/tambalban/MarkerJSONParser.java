@@ -15,8 +15,9 @@ public class MarkerJSONParser {
 
         try{
             jMarkers = new JSONArray();
-
-            jMarkers = jObject.getJSONArray("data");
+            if(jObject != null){
+                jMarkers = jObject.getJSONArray("data");
+            }
         }catch (JSONException e){
             e.printStackTrace();
         }

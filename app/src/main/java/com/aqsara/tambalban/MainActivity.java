@@ -229,6 +229,9 @@ public class MainActivity extends Base implements OnMapReadyCallback {
 
         @Override
         protected void onPostExecute(String s) {
+            if(s == null || s.equals("")){
+                _exit("Terjadi kesalahan pada Server, Coba beberapa saat lagi", MainActivity.this);
+            }
             super.onPostExecute(s);
             new ParserTask().execute(s);
         }
@@ -275,7 +278,6 @@ public class MainActivity extends Base implements OnMapReadyCallback {
     }
 
     public void findClosest(View view){
-        Util.d("findClosest!!!");
         locationsManager.closest();
     }
 

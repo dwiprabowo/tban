@@ -1,5 +1,6 @@
 package com.aqsara.tambalban;
 
+import android.app.Activity;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -79,7 +80,7 @@ public class Base extends AppCompatActivity implements
             if(isNetworkConnected()){
                 notSignedInUser();
             }else{
-                _exit("Tidak terkoneksi dengan Internet");
+                _exit("Tidak terkoneksi dengan Internet", this);
             }
         }
     }
@@ -117,8 +118,9 @@ public class Base extends AppCompatActivity implements
         return user;
     }
 
-    public void _exit(String message){
+    public void _exit(String message, Activity activity){
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        activity.finish();
     }
 
     public boolean isNetworkConnected(){

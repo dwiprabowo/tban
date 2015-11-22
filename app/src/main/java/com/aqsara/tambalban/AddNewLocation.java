@@ -201,6 +201,9 @@ public class AddNewLocation extends Base
 
             @Override
             protected void onPostExecute(String s) {
+                if(s == null || s.equals("")){
+                    _exit("Terjadi kesalahan pada Server, Coba beberapa saat lagi", AddNewLocation.this);
+                }
                 super.onPostExecute(s);
                 startActivity(new Intent(AddNewLocation.this, MainActivity.class));
                 AddNewLocation.this.finish();
