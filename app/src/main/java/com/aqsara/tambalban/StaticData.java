@@ -12,6 +12,10 @@ public class StaticData {
     public final static String base_url_api = "/api/web/";
     private static GoogleSignInAccount account;
 
+    public static String getBaseAPIURL() {
+        return StaticData.protocol + "://" + StaticData.host_api + StaticData.base_url_api;
+    }
+
     public static void setAccount(GoogleSignInAccount account){
         StaticData.account = account;
     }

@@ -98,7 +98,7 @@ public class ReportLocation extends Base
                 String location = params[1];
                 String desc = params[2];
 
-                String strUrl = StaticData.base_url_api + "add_location_report";
+                String strUrl = StaticData.getBaseAPIURL() + "add_location_report";
                 URL url;
 
                 StringBuilder sb = new StringBuilder();

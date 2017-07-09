@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -157,7 +158,7 @@ public class AddNewLocation extends Base
                 String openTime = params[6];
                 String closeTime = params[7];
 
-                String strUrl = StaticData.base_url_api + "add_user_locations";
+                String strUrl = StaticData.getBaseAPIURL() + "add_user_locations";
                 URL url;
 
                 StringBuilder sb = new StringBuilder();
@@ -182,6 +183,7 @@ public class AddNewLocation extends Base
                     outputStreamWriter.flush();
                     outputStreamWriter.close();
 
+                    Log.d("ban", connection.toString());
                     InputStream inputStream = connection.getInputStream();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 

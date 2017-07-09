@@ -58,8 +58,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
     private String mActivityTitle;
 
     GoogleMap mGoogleMap;
-    String base_api_url =
-            StaticData.protocol + "://" + StaticData.host_api + StaticData.base_url_api;
+    String base_api_url = StaticData.getBaseAPIURL();
 
     private LatLng position;
     private Location location;
