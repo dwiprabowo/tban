@@ -3,6 +3,7 @@ package com.aqsara.tambalban;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.auth.api.Auth;
@@ -27,6 +28,7 @@ public class GoogleLoginActivity extends BaseApp implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("ban", "GoogleLoginActivity...");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google_login);
 
@@ -76,11 +78,13 @@ public class GoogleLoginActivity extends BaseApp implements
 
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            Log.d("ban", "result: " + (result.isSuccess() ? "true" : "false"));
             handleSignInResult(result);
         }
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
+        Log.d("ban", "handleSignInResult...");
         if (result.isSuccess()) {
             GoogleSignInAccount acct = result.getSignInAccount();
             StaticData.setAccount(acct);

@@ -2,6 +2,7 @@ package com.aqsara.tambalban;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
@@ -12,6 +13,7 @@ public class LoadingActivity extends Base{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("ban", "LoadingActivity...");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         animateWheel();

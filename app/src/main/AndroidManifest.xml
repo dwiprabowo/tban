@@ -16,7 +16,7 @@
         android:theme="@style/AppTheme" >
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBeLX7-7JlKn3jp_w7j7cgipKVyMKUmHu0" />
+            android:value="AIzaSyBD8bNszsWUjFuP4KLT4pgWsEW512EMWls" />
 
         <activity
             android:name=".LoadingActivity"
@@ -45,6 +45,15 @@
         </activity>
         <activity
             android:name=".InfoActivity"
+            android:label="@string/title_activity_root_help"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
+            android:name=".SettingsActivity"
             android:label="@string/title_activity_root_help"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme" >

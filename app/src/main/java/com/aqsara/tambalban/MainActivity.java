@@ -14,8 +14,10 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -56,7 +58,8 @@ public class MainActivity extends Base implements OnMapReadyCallback {
     private String mActivityTitle;
 
     GoogleMap mGoogleMap;
-    String base_api_url = StaticData.base_url_api;
+    String base_api_url =
+            StaticData.protocol + "://" + StaticData.host_api + StaticData.base_url_api;
 
     private LatLng position;
     private Location location;
@@ -64,6 +67,12 @@ public class MainActivity extends Base implements OnMapReadyCallback {
     private LocationsManager locationsManager;
     public static int locationSelected;
     public static LatLng locationSelectedLatLng;
+
+    private static final String[] INITIAL_PERMS={
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+    };
+    private static final int INITIAL_REQUEST=1337;
 
     @Override
     public void signedInUser() {
@@ -114,10 +123,30 @@ public class MainActivity extends Base implements OnMapReadyCallback {
         }
     }
 
+    private boolean canAccessLocation() {
+        return(hasPermission(Manifest.permission.ACCESS_FINE_LOCATION));
+    }
+
+    private boolean hasPermission(String perm) {
+        return(PackageManager.PERMISSION_GRANTED==ContextCompat.checkSelfPermission(this, perm));
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        Log.d("ban", "requestCode: " + requestCode);
+        Toast.makeText(this, "Location Request", Toast.LENGTH_SHORT).show();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("ban", "MainActivity...");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_main);
+
+        if (!canAccessLocation()) {
+            ActivityCompat.requestPermissions(this, INITIAL_PERMS, INITIAL_REQUEST);
+            System.exit(0);
+        }
 
         mDrawerList = (ListView) findViewById(R.id.navList);
         addDrawerItems();
@@ -136,6 +165,9 @@ public class MainActivity extends Base implements OnMapReadyCallback {
                         signOutDialog();
                         break;
                     case 1:
+                        startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                        break;
+                    case 2:
                         startActivity(new Intent(MainActivity.this, InfoActivity.class));
                         break;
                 }
@@ -358,7 +390,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
     }
 
     private void addDrawerItems() {
-        String[] menus = {"Info"};
+        String[] menus = {"Settings", "Info"};
         mAdapter.set(new ArrayAdapter<>(this, R.layout.drawer_menu_item, menus));
         mDrawerList.setAdapter(mAdapter.get());
     }
@@ -387,8 +419,13 @@ public class MainActivity extends Base implements OnMapReadyCallback {
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
+        }
         googleMap.setMyLocationEnabled(true);
         boolean positionSet = false;
         if(location != null){

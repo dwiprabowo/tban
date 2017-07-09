@@ -7,7 +7,9 @@ import org.json.JSONObject;
 
 public class StaticData {
 
-    public final static String base_url_api = "http://aqsara.com/api/web/";
+    public static String protocol = "http";
+    public static String host_api = "ban.aiueoo.com";
+    public final static String base_url_api = "/api/web/";
     private static GoogleSignInAccount account;
 
     public static void setAccount(GoogleSignInAccount account){
