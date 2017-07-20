@@ -164,7 +164,8 @@ public class MainActivity extends Base implements OnMapReadyCallback {
                         signOutDialog();
                         break;
                     case 1:
-                        startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                        startActivityForResult(new Intent(MainActivity.this, SettingsActivity.class), 9);
+//                        startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                         break;
                     case 2:
                         startActivity(new Intent(MainActivity.this, InfoActivity.class));
@@ -193,6 +194,13 @@ public class MainActivity extends Base implements OnMapReadyCallback {
         locationsManager = new LocationsManager(mGoogleMap);
 
         initLocation();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 9 && resultCode == RESULT_OK) {
+            finish();
+        }
     }
 
     public void reportLocation(View v){
@@ -421,6 +429,7 @@ public class MainActivity extends Base implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        Log.d("ban", "MainActivity onMapReady...");
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);

@@ -32,9 +32,12 @@ public class SettingsActivity extends Base{
     public void update(View view) {
         StaticData.protocol = String.valueOf(webProtocol.getText());
         StaticData.host_api = String.valueOf(host.getText());
+
         Intent i = getBaseContext().getPackageManager()
                 .getLaunchIntentForPackage( getBaseContext().getPackageName() );
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        setResult(RESULT_OK);
+        finish();
         startActivity(i);
     }
 }
